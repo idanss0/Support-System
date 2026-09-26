@@ -86,7 +86,7 @@ while (i < lines.length) {
     code.forEach((c, k) => children.push(new Paragraph({
       bidirectional: false, alignment: AlignmentType.LEFT,
       shading: { type: ShadingType.CLEAR, fill: 'F4F4F4', color: 'auto' },
-      spacing: { after: k === code.length - 1 ? 160 : 0, line: 240 },
+      spacing: { after: k === code.length - 1 ? 160 : 0, line: 240 }, keepLines: true, keepNext: k < code.length - 1,
       children: [new TextRun({ text: c || ' ', font: MONO, size: 16 })],
     })));
     continue;
@@ -99,8 +99,8 @@ while (i < lines.length) {
     const w = Math.round(CONTENT_W / 1440 * 96), h = Math.round(w * ph / pw);
     children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 80, after: 40 }, keepNext: true,
       children: [new ImageRun({ type: 'png', data: buf, transformation: { width: w, height: h }, altText: { title: m[1], description: m[1], name: m[1] } })] }));
-    children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 200 },
-      children: [new TextRun({ text: m[1] + ' (illustration, synthetic data)', font: FONT, size: 17, color: '808080', italics: true })] }));
+    children.push(new Paragraph({ alignment: AlignmentType.CENTER, bidirectional: true, spacing: { after: 200 },
+      children: [new TextRun({ text: 'איור: ' + m[1] + ' (נתונים מומצאים)', font: FONT, size: 17, color: '808080', italics: true, rightToLeft: true })] }));
     i++; continue;
   }
   if ((m = t.match(/^(#{1,3}) (.*)$/))) {
@@ -176,8 +176,28 @@ const doc = new Document({
     properties: { page: { size: { width: PAGE_W, height: 16838 },
       margin: { top: MARGIN, bottom: MARGIN, left: MARGIN, right: MARGIN } } },
     footers: { default: new Footer({ children: [new Paragraph({ alignment: AlignmentType.CENTER,
-      children: [new TextRun({ children: [PageNumber.CURRENT, ' / ', PageNumber.TOTAL_PAGES], size: 18, color: '808080' })] })] }) },
+      children: [new TextRun({ children: ['עמוד ', PageNumber.CURRENT, ' מתוך ', PageNumber.TOTAL_PAGES], size: 18, color: '808080', rightToLeft: true })] })] }) },
     children,
   }],
 });
-Packer.toBuffer(doc).then(b => { fs.writeFileSync(out, b); console.log('written', out); });
+// Make the whole document right-to-left: RTL paragraph default and an RTL section,
+// so viewers that ignore per-paragraph settings still lay the page out right-to-left.
+const JSZip = require('jszip');
+Packer.toBuffer(doc).then(async b => {
+  const zip = await JSZip.loadAsync(b);
+  let styles = await zip.file('word/styles.xml').async('string');
+  styles = styles.includes('<w:pPrDefault><w:pPr>')
+    ? styles.replace('<w:pPrDefault><w:pPr>', '<w:pPrDefault><w:pPr><w:bidi/>')
+    : styles.replace('<w:pPrDefault/>', '<w:pPrDefault><w:pPr><w:bidi/></w:pPr></w:pPrDefault>').replace('<w:docDefaults>', s0 => s0);
+  styles = styles.replace(/(<w:rPrDefault><w:rPr>[\s\S]*?)(<\/w:rPr><\/w:rPrDefault>)/, '$1<w:lang w:val="en-US" w:bidi="he-IL"/>$2');
+  if (!styles.includes('<w:bidi/>')) styles = styles.replace('<w:docDefaults>', '<w:docDefaults><w:pPrDefault><w:pPr><w:bidi/></w:pPr></w:pPrDefault>');
+  zip.file('word/styles.xml', styles);
+  let docXml = await zip.file('word/document.xml').async('string');
+  // Code blocks (diagram, formula) stay left-to-right.
+  docXml = docXml.replace(/(<w:shd w:fill="F4F4F4"[^>]*\/>)(?!<w:bidi)/g, '$1<w:bidi w:val="0"/>');
+  docXml = docXml.replace(/<w:docGrid([^>]*)\/><\/w:sectPr>/, '<w:bidi/><w:docGrid$1/></w:sectPr>');
+  if (!/<w:bidi\/><w:docGrid/.test(docXml)) docXml = docXml.replace('</w:sectPr>', '<w:bidi/></w:sectPr>');
+  zip.file('word/document.xml', docXml);
+  fs.writeFileSync(out, await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' }));
+  console.log('written', out);
+});
