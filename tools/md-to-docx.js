@@ -4,7 +4,8 @@ const path = require('path');
 const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, ShadingType,
   AlignmentType, HeadingLevel, BorderStyle, LevelFormat, Footer, PageNumber, TableLayoutType, ImageRun } = d;
 
-const [, , src, out] = process.argv;
+const [, , src, out, ...flags] = process.argv;
+const NO_BREAKS = flags.includes('--no-breaks');
 let lines = fs.readFileSync(src, 'utf8').split('\n')
   .filter(l => !/^<\/?div/.test(l.trim()));
 
@@ -107,7 +108,7 @@ while (i < lines.length) {
     const lvl = m[1].length;
     const heading = [HeadingLevel.TITLE, HeadingLevel.HEADING_1, HeadingLevel.HEADING_2][lvl - 1];
     children.push(new Paragraph({ heading, bidirectional: true,
-      children: runs(m[2].replace(/\*\*/g, '')), pageBreakBefore: lvl === 2 && children.length > 3 && /^(5|8|9|13|16)\./.test(m[2]) }));
+      children: runs(m[2].replace(/\*\*/g, '')), pageBreakBefore: !NO_BREAKS && lvl === 2 && children.length > 3 && /^(5|8|9|13|16)\./.test(m[2]) }));
     i++; continue;
   }
   if (t.startsWith('|')) {
