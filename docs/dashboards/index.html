@@ -152,7 +152,7 @@ section[role="tabpanel"][hidden] { display: none; }
     <div class="grid">
       <div class="panel c7"><h2>SLA at risk <small>milestone due within 60 min (P1/P2) or 4 h (P3/P4)</small></h2><div class="tbl" id="sla-risk"></div></div>
       <div class="panel c5"><h2>Open work by tier <small>Tier 1: cases · Tiers 2 to 4: open requests</small></h2><div id="backlog-tier"></div><div class="legend" id="prio-legend"></div></div>
-      <div class="panel c7"><h2>Tier 1 phone status <small>as of the last phone refresh</small></h2><div class="agents" id="agents"></div><p class="note">Phone data comes from the Avaya Cloud Office / RingCentral APIs. At about 100 calls a day, a 15 to 60 minute refresh is enough; the exact rate depends on what the API allows.</p></div>
+      <div class="panel c7"><h2>Tier 1 phone status <small>RingCentral presence, last refresh</small></h2><div class="agents" id="agents"></div><p class="note">Phone data comes from the RingCentral APIs. At about 100 inbound calls a day, a 15 to 60 minute refresh is enough.</p></div>
       <div class="panel c5"><h2>Escalation requests waiting for pickup <small>no owner yet</small></h2><div class="tbl" id="pickup"></div></div>
     </div>
   </section>
@@ -171,7 +171,7 @@ section[role="tabpanel"][hidden] { display: none; }
   <section role="tabpanel" id="p-quality" aria-labelledby="t-quality" hidden>
     <div class="grid">
       <div class="panel c7"><h2>Cases per 100 installed assets <small>by version, last 90 days</small></h2><div id="ver-rate"></div><p class="note">Faded bars: fewer than 10 active assets (small sample). Numerator uses the version on the case; denominator uses the version on the asset.</p></div>
-      <div class="panel c5"><h2>Share of cases marked as bug <small>by version, closed cases</small></h2><div id="bug-share"></div></div>
+      <div class="panel c5"><h2>Cases with an R&amp;D-confirmed bug <small>share of cases per version, last 90 days</small></h2><p class="note">Bug flag on the Tier 3 request, set only after R&amp;D confirms.</p><div id="bug-share"></div></div>
       <div class="panel c12"><h2>Product patterns <small>same product + version + subcategory at 3 or more hospitals within 30 days</small></h2><div class="tbl" id="patterns"></div></div>
     </div>
   </section>
@@ -451,7 +451,7 @@ section[role="tabpanel"][hidden] { display: none; }
     ];
     hbars($('ver-rate'), vers.map(([l, v, n]) => ({ label: l, value: v, muted: n < 10, tip: `${l}: ${v} cases per 100 assets · ${n} active assets${n < 10 ? ' · small sample' : ''}` })), { fmt: v => (+v).toFixed(1), left: 110, max: 16 });
     const bugs = [['Product B 6.4', 38], ['Product A 7.2', 24], ['Product C 3.1', 19], ['Product A 7.1', 12], ['Product B 6.3', 9], ['Product C 3.0', 7]];
-    hbars($('bug-share'), bugs.map(([l, v]) => ({ label: l, value: v, color: 'var(--s2)', tip: `${l}: ${v}% of closed cases marked as bug` })), { max: 40, fmt: v => Math.round(v) + '%', left: 110 });
+    hbars($('bug-share'), bugs.map(([l, v]) => ({ label: l, value: v, color: 'var(--s2)', tip: `${l}: ${v}% of cases have an R&D-confirmed bug` })), { max: 40, fmt: v => Math.round(v) + '%', left: 110 });
     const pats = [
       ['Product B 6.4', 'Image display', 'Viewer freezes on large series', 9, 14, 'Yes', pillFor('crit', 'Rising')],
       ['Product A 7.2', 'HL7 interface', 'ORU messages rejected', 5, 7, 'Yes', pillFor('warn', 'Stable')],
@@ -538,12 +538,12 @@ section[role="tabpanel"][hidden] { display: none; }
     lines($('mr-sla'), [{ name: 'SLA compliance', values: sla, color: 'var(--s1)' }], months, { min: 80, max: 100, target: 90, fmt: v => Math.round(v) + '%', h: 240 });
     const vol = months.map((_, i) => Math.round(960 + i * 6 + (rnd() - 0.5) * 90)); vol[10] = 1023; vol[11] = 1064;
     vbars($('mr-vol'), months, vol);
-    table($('mr-top'), ['Version', 'Cases per 100 assets', 'Share marked bug', 'Open in R&D', 'Status'], [
-      ['Product B 6.4', '14.8', '38%', 6, pillFor('crit', 'Escalate to R&D leadership')],
-      ['Product A 7.2', '11.9', '24%', 4, pillFor('warn', 'Watch')],
-      ['Product C 3.1', '9.4', '19%', 3, pillFor('warn', 'Watch')],
-      ['Product A 7.1', '7.7', '12%', 2, pillFor('good', 'Within range')],
-    ], [1, 2, 3]);
+    table($('mr-top'), ['Version', 'Cases per 100 assets', 'Cases with confirmed bug', 'Unique bugs (TFS)', 'Open in R&D', 'Status'], [
+      ['Product B 6.4', '14.8', '38%', 3, 6, pillFor('crit', 'Escalate to R&D leadership')],
+      ['Product A 7.2', '11.9', '24%', 2, 4, pillFor('warn', 'Watch')],
+      ['Product C 3.1', '9.4', '19%', 2, 3, pillFor('warn', 'Watch')],
+      ['Product A 7.1', '7.7', '12%', 1, 2, pillFor('good', 'Within range')],
+    ], [1, 2, 3, 4]);
   }
 
   const renderers = { live: renderLive, load: renderLoad, quality: renderQuality, rnd: renderRnd, customers: renderCustomers, safety: renderSafety, mr: renderMr };
