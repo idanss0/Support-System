@@ -171,7 +171,7 @@ section[role="tabpanel"][hidden] { display: none; }
   <!-- QUALITY -->
   <section role="tabpanel" id="p-quality" aria-labelledby="t-quality" hidden>
     <div class="grid">
-      <div class="panel c7"><h2>Cases per 100 installed assets <small>by version, last 90 days</small></h2><div id="ver-rate"></div><p class="note">Faded bars: fewer than 10 active assets (small sample). Numerator uses the version on the case; denominator uses the version on the asset.</p></div>
+      <div class="panel c7"><h2>Customer-reported cases per 100 installed assets <small>by version, last 90 days</small></h2><div id="ver-rate"></div><p class="note">Faded bars: fewer than 10 active assets (small sample). Numerator uses the version on the case; denominator uses the version on the asset.</p></div>
       <div class="panel c5"><h2>Cases with an R&amp;D-confirmed bug <small>share of cases per version, last 90 days</small></h2><p class="note">Bug flag on the Tier 3 request, set only after R&amp;D confirms.</p><div id="bug-share"></div></div>
       <div class="panel c12"><h2>Product patterns <small>same product + version + subcategory at 3 or more hospitals within 30 days</small></h2><div class="tbl" id="patterns"></div></div>
     </div>
@@ -190,7 +190,7 @@ section[role="tabpanel"][hidden] { display: none; }
   <!-- CUSTOMERS -->
   <section role="tabpanel" id="p-customers" aria-labelledby="t-customers" hidden>
     <div class="grid">
-      <div class="panel c12"><h2>Hospitals by support load <small>last 90 days · weighted by priority · sorted by normalized load</small></h2><div class="tbl" id="hosp"></div><p class="note">Normalized load = weighted load per active installed asset. A large site with many systems is expected to open more cases; the normalized column shows who opens more than their size explains.</p></div>
+      <div class="panel c12"><h2>Hospitals by support load <small>customer-reported cases, last 90 days · weighted by priority · sorted by normalized load</small></h2><div class="tbl" id="hosp"></div><p class="note">Normalized load = weighted load per active installed asset. A large site with many systems is expected to open more cases; the normalized column shows who opens more than their size explains.</p></div>
     </div>
   </section>
 
@@ -207,7 +207,7 @@ section[role="tabpanel"][hidden] { display: none; }
     <div class="kpis" id="mr-kpis"></div>
     <div class="grid">
       <div class="panel c7"><h2>SLA compliance, all priorities <small>monthly · dashed line is the proposed target</small></h2><div class="legend" id="mr-legend"></div><div id="mr-sla"></div></div>
-      <div class="panel c5"><h2>New cases per month <small>all tiers</small></h2><div id="mr-vol"></div></div>
+      <div class="panel c5"><h2>New cases per month <small>all case types</small></h2><div id="mr-vol"></div></div>
       <div class="panel c12"><h2>Top versions by normalized case rate <small>quarter to date</small></h2><div class="tbl" id="mr-top"></div></div>
     </div>
   </section>
@@ -335,7 +335,7 @@ section[role="tabpanel"][hidden] { display: none; }
 
   function vbars(el, labels, values, o = {}) {
     const w = widthOf(el), h = 240, left = 40, right = 10, top = 16, bottom = 26;
-    const max = niceMax(Math.max(...values));
+    const max = o.max || niceMax(Math.max(...values));
     const n = values.length, slot = (w - left - right) / n, bw = Math.min(28, slot - 6);
     const y = v => top + (h - top - bottom) * (1 - v / max);
     let s = svgEl(w, h);
@@ -364,7 +364,7 @@ section[role="tabpanel"][hidden] { display: none; }
     grid.forEach((row, d) => {
       s += `<text class="lbl" x="${left - 8}" y="${top + d * ch + 15}" text-anchor="end">${days[d]}</text>`;
       row.forEach((v, hr) => {
-        s += `<rect x="${left + hr * cw + 1}" y="${top + d * ch + 1}" width="${cw - 2}" height="${ch - 2}" rx="2" style="fill:${mix(lo, hi, v / max)}" data-tip="${days[d]} ${String(hr).padStart(2, '0')}:00 UTC · ${v.toFixed(1)} new cases/day"/>`;
+        s += `<rect x="${left + hr * cw + 1}" y="${top + d * ch + 1}" width="${cw - 2}" height="${ch - 2}" rx="2" style="fill:${mix(lo, hi, v / max)}" data-tip="${days[d]} ${String(hr).padStart(2, '0')}:00 UTC · ${v.toFixed(1)} new cases per hour (daily average)"/>`;
       });
     });
     for (let hr = 0; hr < 24; hr += 3) s += `<text x="${left + hr * cw + cw / 2}" y="${h - 4}" text-anchor="middle">${String(hr).padStart(2, '0')}</text>`;
@@ -402,9 +402,9 @@ section[role="tabpanel"][hidden] { display: none; }
     ].map(r => [sfLink(nextCase()), r[0] === 'P1' ? pillFor('crit', 'P1') : r[0] === 'P2' ? pillFor('warn', 'P2') : pillFor('neutral', r[0]), r[1], r[2], r[3], r[4], `<b>${r[5]}</b>`]);
     table($('sla-risk'), ['Case', 'Priority', 'Tier', 'Product / version', 'Hospital', 'Milestone', 'Time left'], risk, [6]);
     const rows = [
-      { label: 'Tier 1', P1: 0, P2: 14, P3: 96, P4: 71 },
-      { label: 'Tier 2', P1: 1, P2: 22, P3: 61, P4: 34 },
-      { label: 'Tier 3', P1: 1, P2: 15, P3: 33, P4: 18 },
+      { label: 'Tier 1', P1: 0, P2: 42, P3: 381, P4: 287 },
+      { label: 'Tier 2', P1: 1, P2: 38, P3: 164, P4: 93 },
+      { label: 'Tier 3', P1: 1, P2: 21, P3: 62, P4: 34 },
       { label: 'Tier 4 R&D', P1: 0, P2: 9, P3: 24, P4: 12 },
     ];
     stackH($('backlog-tier'), rows, PRIO, PRIO_C, { left: 80 });
@@ -434,7 +434,7 @@ section[role="tabpanel"][hidden] { display: none; }
     const grid = days.map((d, di) => Array.from({ length: 24 }, (_, h) => {
       const us = Math.exp(-Math.pow((h - 15) / 4, 2)) * 2.4, eu = Math.exp(-Math.pow((h - 9) / 3, 2)) * 1.3, ap = Math.exp(-Math.pow((h - 2) / 3, 2)) * 0.6;
       const wk = di >= 5 ? 0.3 : 1;
-      return Math.max(0.05, (us + eu + ap) * wk + rnd() * 0.25);
+      return Math.max(0.5, ((us + eu + ap) * wk + rnd() * 0.25) * 13);
     }));
     heatmap($('heat'), grid, days);
     const agents = Array.from({ length: 12 }, (_, i) => ({ label: `Agent T2-${String(i + 1).padStart(2, '0')}`, value: +(0.45 + rnd() * 1.3).toFixed(2) })).sort((a, b) => b.value - a.value);
@@ -444,20 +444,20 @@ section[role="tabpanel"][hidden] { display: none; }
     legend($('fcr-legend'), [['First-contact resolution', 'var(--s1)', 'line'], ['Escalated to Tier 2', 'var(--s2)', 'line']]);
     lines($('fcr-line'), [{ name: 'FCR', values: fcr, color: 'var(--s1)' }, { name: 'Escalation rate', values: esc2, color: 'var(--s2)' }], weeks, { min: 0, max: 80, fmt: v => Math.round(v) + '%', h: 220 });
     hbars($('case-types'), [
-      { label: 'Customer-reported', value: 610, tip: 'Customer-reported: 610 cases · median handling 1.5 h' },
-      { label: 'Follow-up', value: 220, tip: 'Follow-up: 220 cases · median handling 0.3 h' },
-      { label: 'Proactive monitoring', value: 120, tip: 'Proactive monitoring: 120 cases · median handling 0.8 h' },
-      { label: 'Remote install', value: 50, tip: 'Remote install: 50 cases · median handling 2.9 h' },
-    ], { left: 140, max: 800 });
+      { label: 'Customer-reported', value: 3640, tip: 'Customer-reported: 3,640 cases · median handling 1.5 h' },
+      { label: 'Follow-up', value: 3310, tip: 'Follow-up: 3,310 cases · median handling 0.3 h' },
+      { label: 'Proactive monitoring', value: 2350, tip: 'Proactive monitoring: 2,350 cases · median handling 0.8 h' },
+      { label: 'Remote install', value: 700, tip: 'Remote install: 700 cases · median handling 2.9 h' },
+    ], { left: 140, max: 4000, fmt: v => Math.round(v).toLocaleString('en-US') });
   }
 
   // ---------- QUALITY ----------
   function renderQuality() {
     const vers = [
-      ['Product B 6.4', 14.8, 212], ['Product A 7.2', 11.9, 388], ['Product D 2.1', 10.6, 7], ['Product C 3.1', 9.4, 161], ['Product A 7.1', 7.7, 540],
-      ['Product B 6.3', 6.1, 297], ['Product C 3.0', 5.2, 120], ['Product D 2.0', 4.4, 64], ['Product A 7.0', 3.9, 211], ['Product B 6.2', 3.1, 98],
+      ['Product B 6.4', 790, 212], ['Product A 7.2', 640, 388], ['Product D 2.1', 570, 7], ['Product C 3.1', 510, 161], ['Product A 7.1', 420, 540],
+      ['Product B 6.3', 340, 297], ['Product C 3.0', 290, 120], ['Product D 2.0', 240, 64], ['Product A 7.0', 210, 211], ['Product B 6.2', 170, 98],
     ];
-    hbars($('ver-rate'), vers.map(([l, v, n]) => ({ label: l, value: v, muted: n < 10, tip: `${l}: ${v} cases per 100 assets · ${n} active assets${n < 10 ? ' · small sample' : ''}` })), { fmt: v => (+v).toFixed(1), left: 110, max: 16 });
+    hbars($('ver-rate'), vers.map(([l, v, n]) => ({ label: l, value: v, muted: n < 10, tip: `${l}: ${v} cases per 100 assets · ${n} active assets${n < 10 ? ' · small sample' : ''}` })), { fmt: v => Math.round(v), left: 110, max: 800 });
     const bugs = [['Product B 6.4', 38], ['Product A 7.2', 24], ['Product C 3.1', 19], ['Product A 7.1', 12], ['Product B 6.3', 9], ['Product C 3.0', 7]];
     hbars($('bug-share'), bugs.map(([l, v]) => ({ label: l, value: v, color: 'var(--s2)', tip: `${l}: ${v}% of cases have an R&D-confirmed bug` })), { max: 40, fmt: v => Math.round(v) + '%', left: 110 });
     const pats = [
@@ -503,13 +503,13 @@ section[role="tabpanel"][hidden] { display: none; }
   // ---------- CUSTOMERS ----------
   function renderCustomers() {
     const hs = Array.from({ length: 12 }, () => {
-      const assets = ri(2, 38), cases = Math.max(3, Math.round(assets * (0.6 + rnd() * 1.8))), load = Math.round(cases * (1.8 + rnd() * 1.6));
+      const assets = ri(2, 38), cases = Math.max(8, Math.round(assets * (2.5 + rnd() * 5))), load = Math.round(cases * (1.8 + rnd() * 1.6));
       return { name: hospitalName(ri(1, 520)), region: pick(['Americas', 'Americas', 'EMEA', 'EMEA', 'APAC']), assets, cases, load, norm: +(load / assets).toFixed(1), p12: ri(0, Math.ceil(cases / 4)), old: pick(['Product A 7.0', 'Product B 6.2', '', '', '']) };
     }).sort((a, b) => b.norm - a.norm);
     const maxN = Math.max(...hs.map(h => h.norm));
     table($('hosp'), ['Hospital', 'Region', 'Active assets', 'Cases', 'P1/P2', 'Weighted load', 'Normalized load', 'Oldest version in use'], hs.map(h => [
       `<a href="#" data-tip="Opens the account in Salesforce">${h.name}</a>`, h.region, h.assets, h.cases, h.p12, h.load,
-      `<div class="bar-cell" data-tip="${h.name}: ${h.norm} weighted load per asset"><span class="b" style="width:${Math.round(110 * h.norm / maxN)}px"></span>${h.norm}</div>`,
+      `<div class="bar-cell" data-tip="${h.name}: ${h.norm.toFixed(1)} weighted load per asset"><span class="b" style="width:${Math.round(110 * h.norm / maxN)}px"></span>${h.norm.toFixed(1)}</div>`,
       h.old ? pillFor('warn', h.old) : '<span style="color:var(--muted)">current</span>',
     ]), [2, 3, 4, 5]);
   }
@@ -534,7 +534,7 @@ section[role="tabpanel"][hidden] { display: none; }
   // ---------- MANAGEMENT REVIEW ----------
   function renderMr() {
     kpis($('mr-kpis'), [
-      { lab: 'New cases, September', val: '1,064', foot: '+4% vs August' },
+      { lab: 'New cases, September', val: '10,240', foot: 'all case types · +4% vs August' },
       { lab: 'SLA compliance', val: '91.8', unit: '%', foot: pillFor('good', 'Target ≥ 90%') },
       { lab: 'Abandoned calls (adj.)', val: '4.6', unit: '%', foot: pillFor('good', 'Target ≤ 5%') },
       { lab: 'Backlog over 30 days', val: '13', unit: '%', foot: pillFor('warn', 'Target ≤ 10%') },
@@ -544,13 +544,13 @@ section[role="tabpanel"][hidden] { display: none; }
     const sla = months.map((_, i) => +(86 + i * 0.45 + rnd() * 2).toFixed(1));
     legend($('mr-legend'), [['SLA compliance', 'var(--s1)', 'line'], ['Proposed target', 'transparent', 'dash']]);
     lines($('mr-sla'), [{ name: 'SLA compliance', values: sla, color: 'var(--s1)' }], months, { min: 80, max: 100, target: 90, fmt: v => Math.round(v) + '%', h: 240 });
-    const vol = months.map((_, i) => Math.round(960 + i * 6 + (rnd() - 0.5) * 90)); vol[10] = 1023; vol[11] = 1064;
-    vbars($('mr-vol'), months, vol);
-    table($('mr-top'), ['Version', 'Cases per 100 assets', 'Cases with confirmed bug', 'Unique bugs (TFS)', 'Open in R&D', 'Status'], [
-      ['Product B 6.4', '14.8', '38%', 3, 6, pillFor('crit', 'Escalate to R&D leadership')],
-      ['Product A 7.2', '11.9', '24%', 2, 4, pillFor('warn', 'Watch')],
-      ['Product C 3.1', '9.4', '19%', 2, 3, pillFor('warn', 'Watch')],
-      ['Product A 7.1', '7.7', '12%', 1, 2, pillFor('good', 'Within range')],
+    const vol = months.map((_, i) => Math.round(9500 + i * 50 + (rnd() - 0.5) * 700)); vol[10] = 9850; vol[11] = 10240;
+    vbars($('mr-vol'), months, vol, { max: 12000 });
+    table($('mr-top'), ['Version', 'Customer-reported cases per 100 assets', 'Cases with confirmed bug', 'Unique bugs (TFS)', 'Open in R&D', 'Status'], [
+      ['Product B 6.4', '790', '38%', 3, 6, pillFor('crit', 'Escalate to R&D leadership')],
+      ['Product A 7.2', '640', '24%', 2, 4, pillFor('warn', 'Watch')],
+      ['Product C 3.1', '510', '19%', 2, 3, pillFor('warn', 'Watch')],
+      ['Product A 7.1', '420', '12%', 1, 2, pillFor('good', 'Within range')],
     ], [1, 2, 3, 4]);
   }
 
