@@ -1,0 +1,571 @@
+<title>Support Control Tower</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Hebrew:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --page: #f2f4f6;
+  --surface: #fcfcfd;
+  --surface-2: #eef1f4;
+  --ink: #0e1116;
+  --ink-2: #4b5360;
+  --muted: #7d8591;
+  --grid: #e1e5ea;
+  --axis: #c2c8d0;
+  --ring: rgba(14,17,22,0.10);
+  --accent: #1f5fae;
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a;
+  --p1: #104281; --p2: #256abf; --p3: #5598e7; --p4: #86b6ef;
+  --heat-lo: #eaf2fc; --heat-hi: #0d366b;
+  --good: #0ca30c; --warning: #fab219; --serious: #ec835a; --critical: #d03b3b;
+  --good-ink: #006300; --crit-ink: #b02a2a; --warn-ink: #8a5a00;
+  --tip-bg: #0e1116; --tip-ink: #ffffff;
+  --sans: "IBM Plex Sans", "IBM Plex Sans Hebrew", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0f1114; --surface: #181b1f; --surface-2: #22262c;
+    --ink: #f4f6f8; --ink-2: #c1c7cf; --muted: #8a929c;
+    --grid: #2a2f36; --axis: #3a4049; --ring: rgba(255,255,255,0.10);
+    --accent: #6aa6ee;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70;
+    --p1: #cde2fb; --p2: #86b6ef; --p3: #3987e5; --p4: #1c5cab;
+    --heat-lo: #1b2533; --heat-hi: #b7d3f6;
+    --good-ink: #0ca30c; --crit-ink: #e66767; --warn-ink: #fab219;
+    --tip-bg: #f4f6f8; --tip-ink: #0e1116;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0f1114; --surface: #181b1f; --surface-2: #22262c;
+  --ink: #f4f6f8; --ink-2: #c1c7cf; --muted: #8a929c;
+  --grid: #2a2f36; --axis: #3a4049; --ring: rgba(255,255,255,0.10);
+  --accent: #6aa6ee;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70;
+  --p1: #cde2fb; --p2: #86b6ef; --p3: #3987e5; --p4: #1c5cab;
+  --heat-lo: #1b2533; --heat-hi: #b7d3f6;
+  --good-ink: #0ca30c; --crit-ink: #e66767; --warn-ink: #fab219;
+  --tip-bg: #f4f6f8; --tip-ink: #0e1116;
+}
+* { box-sizing: border-box; }
+body { background: var(--page); color: var(--ink); font-family: var(--sans); font-size: 14px; line-height: 1.45; margin: 0; }
+.wrap { max-width: 1320px; margin: 0 auto; padding-inline: 20px; padding-block: 16px 40px; display: flex; flex-direction: column; gap: 14px; }
+header.top { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; justify-content: space-between; }
+.brand { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.brand h1 { font-size: 20px; font-weight: 600; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+.brand .sub { color: var(--muted); font-size: 13px; }
+.demo { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--warn-ink); background: color-mix(in srgb, var(--warning) 16%, transparent); border: 1px solid color-mix(in srgb, var(--warning) 45%, transparent); padding: 4px 10px; border-radius: 999px; }
+.demo [dir="rtl"] { font-family: "IBM Plex Sans Hebrew", var(--sans); }
+nav.tabs { display: flex; gap: 2px; overflow-x: auto; border-bottom: 1px solid var(--grid); scrollbar-width: thin; }
+nav.tabs button { font: inherit; font-size: 13.5px; color: var(--ink-2); background: none; border: 0; padding: 9px 14px; border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap; }
+nav.tabs button:hover { color: var(--ink); background: var(--surface-2); }
+nav.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); font-weight: 600; }
+nav.tabs button:focus-visible, .filters select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.filters { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; }
+.filters label { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.filters select { font: inherit; font-size: 13px; text-transform: none; letter-spacing: 0; color: var(--ink); background: var(--surface); border: 1px solid var(--ring); border-radius: 6px; padding: 4px 8px; }
+.stamp { margin-inline-start: auto; font-size: 12px; color: var(--muted); font-family: var(--mono); }
+.grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 12px; }
+.panel { background: var(--surface); border: 1px solid var(--ring); border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.panel h2 { font-size: 13.5px; font-weight: 600; margin: 0; display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+.panel h2 small { font-weight: 400; color: var(--muted); font-size: 12px; }
+.c12 { grid-column: span 12; } .c8 { grid-column: span 8; } .c7 { grid-column: span 7; } .c6 { grid-column: span 6; } .c5 { grid-column: span 5; } .c4 { grid-column: span 4; }
+@media (max-width: 900px) { .c8, .c7, .c6, .c5, .c4 { grid-column: span 12; } }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.kpi { background: var(--surface); border: 1px solid var(--ring); border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; }
+.kpi .lab { font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.kpi .val { font-size: 26px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.15; }
+.kpi .val small { font-size: 13px; font-weight: 400; color: var(--ink-2); margin-inline-start: 4px; }
+.kpi .foot { font-size: 12px; color: var(--ink-2); display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 500; padding: 1px 8px 1px 6px; border-radius: 999px; border: 1px solid; white-space: nowrap; }
+.pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.pill.good { color: var(--good-ink); border-color: color-mix(in srgb, var(--good) 40%, transparent); background: color-mix(in srgb, var(--good) 10%, transparent); }
+.pill.good::before { content: "✓"; width: auto; height: auto; background: none; font-size: 10px; }
+.pill.warn { color: var(--warn-ink); border-color: color-mix(in srgb, var(--warning) 55%, transparent); background: color-mix(in srgb, var(--warning) 14%, transparent); }
+.pill.warn::before { content: "!"; width: auto; height: auto; background: none; font-weight: 700; font-size: 11px; }
+.pill.crit { color: var(--crit-ink); border-color: color-mix(in srgb, var(--critical) 45%, transparent); background: color-mix(in srgb, var(--critical) 10%, transparent); }
+.pill.crit::before { content: "▲"; width: auto; height: auto; background: none; font-size: 8px; }
+.pill.neutral { color: var(--ink-2); border-color: var(--ring); background: var(--surface-2); }
+.pill.neutral::before { display: none; }
+.tbl { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; font-weight: 500; font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; padding: 6px 8px; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+td { padding: 6px 8px; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+td a { color: var(--accent); text-decoration: none; font-family: var(--mono); font-size: 12.5px; }
+td a:hover { text-decoration: underline; }
+tr:last-child td { border-bottom: 0; }
+.bar-cell { display: flex; align-items: center; gap: 8px; min-width: 140px; }
+.bar-cell span.b { height: 8px; border-radius: 0 4px 4px 0; background: var(--s1); }
+svg { display: block; width: 100%; height: auto; overflow: visible; }
+svg text { fill: var(--muted); font-family: var(--sans); font-size: 11px; }
+svg .lbl { fill: var(--ink-2); }
+svg .val { fill: var(--ink); font-variant-numeric: tabular-nums; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--ink-2); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-inline-end: 6px; vertical-align: -1px; }
+.legend i.line { height: 2px; width: 14px; border-radius: 1px; vertical-align: 3px; }
+.legend i.dash { height: 0; width: 14px; border-top: 2px dashed var(--ink-2); vertical-align: 3px; background: none; }
+.note { font-size: 12px; color: var(--muted); margin: 0; }
+.agents { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; }
+.agents div { background: var(--surface-2); border-radius: 6px; padding: 8px 10px; display: flex; flex-direction: column; }
+.agents b { font-size: 20px; font-weight: 600; }
+.agents span { font-size: 12px; color: var(--ink-2); }
+#tip { position: fixed; pointer-events: none; background: var(--tip-bg); color: var(--tip-ink); font-size: 12px; padding: 6px 9px; border-radius: 6px; max-width: 260px; z-index: 10; line-height: 1.35; }
+[data-tip] { cursor: default; }
+section[role="tabpanel"] { display: flex; flex-direction: column; gap: 12px; }
+section[role="tabpanel"][hidden] { display: none; }
+@media (prefers-reduced-motion: no-preference) { nav.tabs button { transition: background-color .15s, color .15s; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1>Support Control Tower</h1>
+      <span class="sub">Spotfire Cloud · MVP dashboard mockup</span>
+    </div>
+    <span class="demo"><span>Illustration · synthetic data</span><span dir="rtl">המחשה בלבד, נתונים מומצאים</span></span>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Dashboards">
+    <button role="tab" id="t-live" data-tab="live" aria-selected="true">Live</button>
+    <button role="tab" id="t-load" data-tab="load" aria-selected="false">Load &amp; productivity</button>
+    <button role="tab" id="t-quality" data-tab="quality" aria-selected="false">Product quality</button>
+    <button role="tab" id="t-rnd" data-tab="rnd" aria-selected="false">R&amp;D escalations</button>
+    <button role="tab" id="t-customers" data-tab="customers" aria-selected="false">Hospitals</button>
+    <button role="tab" id="t-safety" data-tab="safety" aria-selected="false">Patient safety (QARA)</button>
+    <button role="tab" id="t-mr" data-tab="mr" aria-selected="false">Management review</button>
+  </nav>
+
+  <div class="filters" aria-label="Filters">
+    <label for="f-range">Period <select id="f-range"><option>Last 30 days</option><option>Last 7 days</option><option>Last 90 days</option><option>Month to date</option></select></label>
+    <label for="f-region">Region <select id="f-region"><option>All regions</option><option>Americas</option><option>EMEA</option><option>APAC</option></select></label>
+    <label for="f-tier">Tier <select id="f-tier"><option>All tiers</option><option>Tier 1</option><option>Tier 2</option><option>Tier 3</option><option>Tier 4 (R&amp;D)</option></select></label>
+    <label for="f-product">Product <select id="f-product"><option>All products</option><option>Product A</option><option>Product B</option><option>Product C</option><option>Product D</option></select></label>
+    <span class="stamp" id="stamp">Salesforce: 14:05 UTC · Phone: 13:45 UTC</span>
+  </div>
+
+  <!-- LIVE -->
+  <section role="tabpanel" id="p-live" aria-labelledby="t-live">
+    <div class="kpis" id="live-kpis"></div>
+    <div class="grid">
+      <div class="panel c7"><h2>SLA at risk <small>milestone due within 60 min (P1/P2) or 4 h (P3/P4)</small></h2><div class="tbl" id="sla-risk"></div></div>
+      <div class="panel c5"><h2>Open work by tier <small>Tier 1: cases · Tiers 2 to 4: open requests</small></h2><div id="backlog-tier"></div><div class="legend" id="prio-legend"></div></div>
+      <div class="panel c7"><h2>Tier 1 phone status <small>as of the last phone refresh</small></h2><div class="agents" id="agents"></div><p class="note">Phone data comes from the Avaya Cloud Office / RingCentral APIs. At about 100 calls a day, a 15 to 60 minute refresh is enough; the exact rate depends on what the API allows.</p></div>
+      <div class="panel c5"><h2>Escalation requests waiting for pickup <small>no owner yet</small></h2><div class="tbl" id="pickup"></div></div>
+    </div>
+  </section>
+
+  <!-- LOAD -->
+  <section role="tabpanel" id="p-load" aria-labelledby="t-load" hidden>
+    <div class="kpis" id="load-kpis"></div>
+    <div class="grid">
+      <div class="panel c7"><h2>Tier 1 new cases by hour (UTC) <small>average per day, last 8 weeks</small></h2><div id="heat"></div><div class="legend" id="heat-legend"></div></div>
+      <div class="panel c5"><h2>Weighted load index, Tier 2 <small>1.0 = tier median</small></h2><div id="load-idx"></div></div>
+      <div class="panel c12"><h2>Tier 1 first-contact resolution and escalation rate <small>weekly</small></h2><div class="legend" id="fcr-legend"></div><div id="fcr-line"></div></div>
+    </div>
+  </section>
+
+  <!-- QUALITY -->
+  <section role="tabpanel" id="p-quality" aria-labelledby="t-quality" hidden>
+    <div class="grid">
+      <div class="panel c7"><h2>Cases per 100 installed assets <small>by version, last 90 days</small></h2><div id="ver-rate"></div><p class="note">Faded bars: fewer than 10 active assets (small sample). Numerator uses the version on the case; denominator uses the version on the asset.</p></div>
+      <div class="panel c5"><h2>Share of cases marked as bug <small>by version, closed cases</small></h2><div id="bug-share"></div></div>
+      <div class="panel c12"><h2>Product patterns <small>same product + version + subcategory at 3 or more hospitals within 30 days</small></h2><div class="tbl" id="patterns"></div></div>
+    </div>
+  </section>
+
+  <!-- R&D -->
+  <section role="tabpanel" id="p-rnd" aria-labelledby="t-rnd" hidden>
+    <div class="kpis" id="rnd-kpis"></div>
+    <div class="grid">
+      <div class="panel c5"><h2>Open R&amp;D requests by age <small>stacked by priority</small></h2><div id="rnd-age"></div><div class="legend" id="rnd-legend"></div></div>
+      <div class="panel c7"><h2>Requests into and out of R&amp;D <small>weekly</small></h2><div class="legend" id="flow-legend"></div><div id="rnd-flow"></div></div>
+      <div class="panel c12"><h2>Open more than 30 days <small>for the weekly R&amp;D review</small></h2><div class="tbl" id="rnd-old"></div></div>
+    </div>
+  </section>
+
+  <!-- CUSTOMERS -->
+  <section role="tabpanel" id="p-customers" aria-labelledby="t-customers" hidden>
+    <div class="grid">
+      <div class="panel c12"><h2>Hospitals by support load <small>last 90 days · weighted by priority · sorted by normalized load</small></h2><div class="tbl" id="hosp"></div><p class="note">Normalized load = weighted load per active installed asset. A large site with many systems is expected to open more cases; the normalized column shows who opens more than their size explains.</p></div>
+    </div>
+  </section>
+
+  <!-- SAFETY -->
+  <section role="tabpanel" id="p-safety" aria-labelledby="t-safety" hidden>
+    <div class="kpis" id="safety-kpis"></div>
+    <div class="grid">
+      <div class="panel c12"><h2>Cases flagged for possible patient harm <small>tracking only · decisions and records stay in Salesforce and the QMS</small></h2><div class="tbl" id="safety-tbl"></div></div>
+    </div>
+  </section>
+
+  <!-- MANAGEMENT REVIEW -->
+  <section role="tabpanel" id="p-mr" aria-labelledby="t-mr" hidden>
+    <div class="kpis" id="mr-kpis"></div>
+    <div class="grid">
+      <div class="panel c7"><h2>SLA compliance, all priorities <small>monthly · dashed line is the proposed target</small></h2><div class="legend" id="mr-legend"></div><div id="mr-sla"></div></div>
+      <div class="panel c5"><h2>New cases per month <small>all tiers</small></h2><div id="mr-vol"></div></div>
+      <div class="panel c12"><h2>Top versions by normalized case rate <small>quarter to date</small></h2><div class="tbl" id="mr-top"></div></div>
+    </div>
+  </section>
+</div>
+<div id="tip" hidden></div>
+
+<script>
+(() => {
+  // ---------- deterministic synthetic data ----------
+  let seed = 20260926;
+  const rnd = () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  const ri = (a, b) => a + Math.floor(rnd() * (b - a + 1));
+  const pick = arr => arr[Math.floor(rnd() * arr.length)];
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const sfLink = (id) => `<a href="#" data-tip="Opens case ${id} in Salesforce">${id}</a>`;
+  const products = ['Product A', 'Product B', 'Product C', 'Product D'];
+  const subcats = ['Login / SSO', 'DICOM transfer', 'Report export', 'Image display', 'HL7 interface', 'License activation', 'Performance', 'Printing', 'Upgrade install', 'Audit log'];
+  const hospitalName = n => `Hospital ${String(n).padStart(3, '0')}`;
+  const pillFor = (state, text) => `<span class="pill ${state}">${esc(text)}</span>`;
+
+  // ---------- tooltip ----------
+  const tip = $('tip');
+  document.addEventListener('pointermove', e => {
+    const t = e.target.closest('[data-tip]');
+    if (!t) { tip.hidden = true; return; }
+    tip.textContent = t.getAttribute('data-tip');
+    tip.hidden = false;
+    const x = Math.min(e.clientX + 14, window.innerWidth - tip.offsetWidth - 8);
+    const y = Math.min(e.clientY + 14, window.innerHeight - tip.offsetHeight - 8);
+    tip.style.left = x + 'px'; tip.style.top = y + 'px';
+  });
+  document.addEventListener('click', e => { if (e.target.closest('td a')) e.preventDefault(); });
+
+  // ---------- chart helpers ----------
+  const NS = 'http://www.w3.org/2000/svg';
+  const svgEl = (w, h) => `<svg viewBox="0 0 ${w} ${h}" role="img">`;
+  const widthOf = el => Math.max(300, Math.round(el.getBoundingClientRect().width) || 560);
+  const nTicks = range => [5, 4, 3].find(m => Number.isInteger(range / m)) || 4;
+  const niceMax = v => { const p = Math.pow(10, Math.floor(Math.log10(v))); const m = v / p; return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 2.5 ? 2.5 : m <= 5 ? 5 : 10) * p; };
+
+  function hbars(el, items, o = {}) {
+    const w = widthOf(el), rowH = 26, left = o.left || 120, right = 56, top = 6;
+    const h = top + items.length * rowH + 22;
+    const max = o.max || niceMax(Math.max(...items.map(d => d.value)));
+    const x = v => left + (w - left - right) * v / max;
+    let s = svgEl(w, h);
+    const ticks = o.ticks || 4;
+    for (let i = 0; i <= ticks; i++) {
+      const v = max * i / ticks, xx = x(v);
+      s += `<line x1="${xx}" x2="${xx}" y1="${top}" y2="${h - 18}" style="stroke:var(--grid)" stroke-width="1"/>`;
+      s += `<text x="${xx}" y="${h - 4}" text-anchor="middle">${o.fmt ? o.fmt(v) : v}</text>`;
+    }
+    if (o.ref != null) {
+      const xr = x(o.ref);
+      s += `<line x1="${xr}" x2="${xr}" y1="${top - 2}" y2="${h - 18}" style="stroke:var(--ink-2)" stroke-width="1.5" stroke-dasharray="4 3"/>`;
+    }
+    items.forEach((d, i) => {
+      const y = top + i * rowH + 5, bh = 14, bw = Math.max(2, x(d.value) - left);
+      s += `<text class="lbl" x="${left - 8}" y="${y + 11}" text-anchor="end">${esc(d.label)}</text>`;
+      s += `<path d="M${left},${y} h${bw - 4} a4,4 0 0 1 4,4 v${bh - 8} a4,4 0 0 1 -4,4 h${-(bw - 4)} z" style="fill:${d.color || 'var(--s1)'};opacity:${d.muted ? 0.35 : 1}" data-tip="${esc(d.tip || d.label + ': ' + d.value)}"/>`;
+      s += `<text class="val" x="${left + bw + 6}" y="${y + 11}">${o.fmt ? o.fmt(d.value) : d.value}</text>`;
+    });
+    el.innerHTML = s + '</svg>';
+  }
+
+  function stackH(el, rows, keys, colors, o = {}) {
+    const w = widthOf(el), rowH = 30, left = o.left || 90, right = 40, top = 6;
+    const h = top + rows.length * rowH + 22;
+    const max = niceMax(Math.max(...rows.map(r => keys.reduce((a, k) => a + r[k], 0))));
+    const x = v => (w - left - right) * v / max;
+    let s = svgEl(w, h);
+    const tk = nTicks(max);
+    for (let i = 0; i <= tk; i++) {
+      const xx = left + x(max * i / tk);
+      s += `<line x1="${xx}" x2="${xx}" y1="${top}" y2="${h - 18}" style="stroke:var(--grid)"/>`;
+      s += `<text x="${xx}" y="${h - 4}" text-anchor="middle">${max * i / tk}</text>`;
+    }
+    rows.forEach((r, i) => {
+      const y = top + i * rowH + 7; let cx = left; const total = keys.reduce((a, k) => a + r[k], 0);
+      s += `<text class="lbl" x="${left - 8}" y="${y + 12}" text-anchor="end">${esc(r.label)}</text>`;
+      keys.forEach((k, j) => {
+        const bw = x(r[k]); if (bw <= 0) return;
+        const last = j === keys.length - 1;
+        const wv = Math.max(0, bw - (last ? 0 : 2));
+        s += last && wv > 4
+          ? `<path d="M${cx},${y} h${wv - 4} a4,4 0 0 1 4,4 v8 a4,4 0 0 1 -4,4 h${-(wv - 4)} z" style="fill:${colors[j]}" data-tip="${esc(r.label + ' · ' + k + ': ' + r[k])}"/>`
+          : `<rect x="${cx}" y="${y}" width="${wv}" height="16" style="fill:${colors[j]}" data-tip="${esc(r.label + ' · ' + k + ': ' + r[k])}"/>`;
+        cx += bw;
+      });
+      s += `<text class="val" x="${cx + 6}" y="${y + 12}">${total}</text>`;
+    });
+    el.innerHTML = s + '</svg>';
+  }
+
+  function lines(el, series, labels, o = {}) {
+    const w = widthOf(el), h = o.h || 240, left = 44, right = 70, top = 10, bottom = 26;
+    const lo = o.min ?? 0, hi = o.max ?? niceMax(Math.max(...series.flatMap(s => s.values)));
+    const x = i => left + (w - left - right) * i / (labels.length - 1);
+    const y = v => top + (h - top - bottom) * (1 - (v - lo) / (hi - lo));
+    let s = svgEl(w, h);
+    const steps = nTicks(hi - lo);
+    for (let i = 0; i <= steps; i++) {
+      const v = lo + (hi - lo) * i / steps, yy = y(v);
+      s += `<line x1="${left}" x2="${w - right}" y1="${yy}" y2="${yy}" style="stroke:${i === 0 ? 'var(--axis)' : 'var(--grid)'}"/>`;
+      s += `<text x="${left - 8}" y="${yy + 4}" text-anchor="end">${o.fmt ? o.fmt(v) : v}</text>`;
+    }
+    const every = Math.ceil(labels.length / 8);
+    labels.forEach((l, i) => { if (i % every === 0 || i === labels.length - 1) s += `<text x="${x(i)}" y="${h - 6}" text-anchor="middle">${esc(l)}</text>`; });
+    if (o.target != null) {
+      s += `<line x1="${left}" x2="${w - right}" y1="${y(o.target)}" y2="${y(o.target)}" style="stroke:var(--ink-2)" stroke-width="1.5" stroke-dasharray="5 4"/>`;
+      s += `<text class="lbl" x="${w - right + 6}" y="${y(o.target) + 4}">target ${o.fmt ? o.fmt(o.target) : o.target}</text>`;
+    }
+    series.forEach(se => {
+      const d = se.values.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join('');
+      s += `<path d="${d}" fill="none" style="stroke:${se.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+      const li = se.values.length - 1;
+      s += `<circle cx="${x(li)}" cy="${y(se.values[li])}" r="4" style="fill:${se.color};stroke:var(--surface)" stroke-width="2"/>`;
+      if (!o.target) s += `<text class="val" x="${x(li) + 8}" y="${y(se.values[li]) + 4}">${o.fmt ? o.fmt(se.values[li]) : se.values[li]}</text>`;
+      se.values.forEach((v, i) => { s += `<rect x="${x(i) - 8}" y="${top}" width="16" height="${h - top - bottom}" style="fill:transparent" data-tip="${esc(labels[i] + ' · ' + se.name + ': ' + (o.fmt ? o.fmt(v) : v))}"/>`; });
+    });
+    el.innerHTML = s + '</svg>';
+  }
+
+  function vbars(el, labels, values, o = {}) {
+    const w = widthOf(el), h = 240, left = 40, right = 10, top = 16, bottom = 26;
+    const max = niceMax(Math.max(...values));
+    const n = values.length, slot = (w - left - right) / n, bw = Math.min(28, slot - 6);
+    const y = v => top + (h - top - bottom) * (1 - v / max);
+    let s = svgEl(w, h);
+    for (let i = 0; i <= 4; i++) { const v = max * i / 4, yy = y(v); s += `<line x1="${left}" x2="${w - right}" y1="${yy}" y2="${yy}" style="stroke:${i === 0 ? 'var(--axis)' : 'var(--grid)'}"/><text x="${left - 6}" y="${yy + 4}" text-anchor="end">${v}</text>`; }
+    values.forEach((v, i) => {
+      const cx = left + slot * i + (slot - bw) / 2, yy = y(v), bh = y(0) - yy;
+      s += `<path d="M${cx},${y(0)} v${-(bh - 4)} a4,4 0 0 1 4,-4 h${bw - 8} a4,4 0 0 1 4,4 v${bh - 4} z" style="fill:var(--s1)" data-tip="${esc(labels[i] + ': ' + v + ' cases')}"/>`;
+      if (i % 2 === 0 || i === n - 1) s += `<text x="${cx + bw / 2}" y="${h - 6}" text-anchor="middle">${esc(labels[i])}</text>`;
+    });
+    s += `<text class="val" x="${left + slot * (n - 1) + slot / 2}" y="${y(values[n - 1]) - 5}" text-anchor="middle">${values[n - 1]}</text>`;
+    el.innerHTML = s + '</svg>';
+  }
+
+  function mix(a, b, t) {
+    const p = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+    const A = p(a), B = p(b);
+    return '#' + A.map((v, i) => Math.round(v + (B[i] - v) * t).toString(16).padStart(2, '0')).join('');
+  }
+
+  function heatmap(el, grid, days) {
+    const cs = getComputedStyle(document.documentElement);
+    const lo = cs.getPropertyValue('--heat-lo').trim(), hi = cs.getPropertyValue('--heat-hi').trim();
+    const w = widthOf(el), left = 40, top = 4, cw = (w - left - 4) / 24, ch = 22, h = top + days.length * ch + 22;
+    const max = Math.max(...grid.flat());
+    let s = svgEl(w, h);
+    grid.forEach((row, d) => {
+      s += `<text class="lbl" x="${left - 8}" y="${top + d * ch + 15}" text-anchor="end">${days[d]}</text>`;
+      row.forEach((v, hr) => {
+        s += `<rect x="${left + hr * cw + 1}" y="${top + d * ch + 1}" width="${cw - 2}" height="${ch - 2}" rx="2" style="fill:${mix(lo, hi, v / max)}" data-tip="${days[d]} ${String(hr).padStart(2, '0')}:00 UTC · ${v.toFixed(1)} new cases/day"/>`;
+      });
+    });
+    for (let hr = 0; hr < 24; hr += 3) s += `<text x="${left + hr * cw + cw / 2}" y="${h - 4}" text-anchor="middle">${String(hr).padStart(2, '0')}</text>`;
+    el.innerHTML = s + '</svg>';
+    $('heat-legend').innerHTML = `<span><i style="background:${lo}"></i>fewer</span><span><i style="background:${mix(lo, hi, .5)}"></i></span><span><i style="background:${hi}"></i>more new cases per hour</span>`;
+  }
+
+  const legend = (el, items) => { el.innerHTML = items.map(([name, color, kind]) => `<span><i class="${kind || ''}" style="background:${color}"></i>${esc(name)}</span>`).join(''); };
+  const kpis = (el, list) => { el.innerHTML = list.map(k => `<div class="kpi"><span class="lab">${esc(k.lab)}</span><span class="val">${k.val}${k.unit ? `<small>${esc(k.unit)}</small>` : ''}</span><span class="foot">${k.foot || ''}</span></div>`).join(''); };
+  const table = (el, head, rows, numCols = []) => {
+    el.innerHTML = `<table><thead><tr>${head.map((h, i) => `<th class="${numCols.includes(i) ? 'num' : ''}">${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map((c, i) => `<td class="${numCols.includes(i) ? 'num' : ''}">${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+  };
+  const PRIO = ['P1', 'P2', 'P3', 'P4'];
+  const PRIO_C = ['var(--p1)', 'var(--p2)', 'var(--p3)', 'var(--p4)'];
+  let caseNo = 480210;
+  const nextCase = () => '0' + (caseNo += ri(3, 40));
+
+  // ---------- LIVE ----------
+  function renderLive() {
+    kpis($('live-kpis'), [
+      { lab: 'Calls today', val: 58, foot: 'by 14:00 UTC · about 100 a day' },
+      { lab: 'Abandoned, last 7 days', val: '3.1', unit: '%', foot: `${pillFor('good', 'Target ≤ 5%')} raw 4.4%` },
+      { lab: 'Answered in 60 s, 7 days', val: '86', unit: '%', foot: pillFor('good', 'Target ≥ 80%') },
+      { lab: 'Open P1', val: 2, foot: pillFor('crit', '1 over 4 h') },
+      { lab: 'SLA at risk', val: 6, foot: pillFor('warn', '2 due in 30 min') },
+      { lab: 'Requests waiting for pickup', val: 3, foot: 'Tier 2: 2 · Tier 3: 1' },
+    ]);
+    const risk = [
+      ['P1', 'Tier 3', 'Product B 6.4', 'Hospital 214', 'Resolution', '0:18'],
+      ['P2', 'Tier 2', 'Product A 7.2', 'Hospital 087', 'First response', '0:26'],
+      ['P2', 'Tier 2', 'Product C 3.1', 'Hospital 351', 'Resolution', '0:41'],
+      ['P3', 'Tier 1', 'Product A 7.1', 'Hospital 402', 'First response', '1:12'],
+      ['P3', 'Tier 2', 'Product D 2.0', 'Hospital 019', 'Resolution', '2:35'],
+      ['P4', 'Tier 1', 'Product B 6.3', 'Hospital 276', 'Resolution', '3:48'],
+    ].map(r => [sfLink(nextCase()), r[0] === 'P1' ? pillFor('crit', 'P1') : r[0] === 'P2' ? pillFor('warn', 'P2') : pillFor('neutral', r[0]), r[1], r[2], r[3], r[4], `<b>${r[5]}</b>`]);
+    table($('sla-risk'), ['Case', 'Priority', 'Tier', 'Product / version', 'Hospital', 'Milestone', 'Time left'], risk, [6]);
+    const rows = [
+      { label: 'Tier 1', P1: 0, P2: 14, P3: 96, P4: 71 },
+      { label: 'Tier 2', P1: 1, P2: 22, P3: 61, P4: 34 },
+      { label: 'Tier 3', P1: 1, P2: 15, P3: 33, P4: 18 },
+      { label: 'Tier 4 R&D', P1: 0, P2: 9, P3: 24, P4: 12 },
+    ];
+    stackH($('backlog-tier'), rows, PRIO, PRIO_C, { left: 80 });
+    legend($('prio-legend'), PRIO.map((p, i) => [p, PRIO_C[i]]));
+    $('agents').innerHTML = [['9', 'Available'], ['2', 'On a call'], ['1', 'After-call work'], ['1', 'Break'], ['37', 'Off shift']].map(([n, l]) => `<div><b>${n}</b><span>${l}</span></div>`).join('');
+    table($('pickup'), ['Request', 'To tier', 'Priority', 'Waiting'], [
+      [`<a href="#" data-tip="Opens the request in Salesforce">REQ-20931</a>`, 'Tier 2', pillFor('warn', 'P2'), '<b>0:47</b>'],
+      [`<a href="#" data-tip="Opens the request in Salesforce">REQ-20935</a>`, 'Tier 2', pillFor('neutral', 'P3'), '0:22'],
+      [`<a href="#" data-tip="Opens the request in Salesforce">REQ-20936</a>`, 'Tier 3', pillFor('neutral', 'P3'), '0:09'],
+    ], [3]);
+  }
+
+  // ---------- LOAD ----------
+  function renderLoad() {
+    const weeks = Array.from({ length: 16 }, (_, i) => `W${i + 22}`);
+    const fcr = weeks.map((_, i) => +(55 + i * 0.4 + rnd() * 3).toFixed(1));
+    const esc2 = weeks.map((_, i) => +(31 - i * 0.25 + rnd() * 2.5).toFixed(1));
+    const L = weeks.length - 1;
+    kpis($('load-kpis'), [
+      { lab: 'Tier 1 FCR, last week', val: Math.round(fcr[L]), unit: '%', foot: 'baseline period · no target yet' },
+      { lab: 'Escalation rate T1 → T2', val: Math.round(esc2[L]), unit: '%', foot: `${(esc2[L] - esc2[L - 4]).toFixed(1)} pts vs 4 weeks ago` },
+      { lab: 'Reopen rate', val: '4.2', unit: '%', foot: pillFor('good', 'Target ≤ 5%') },
+      { lab: 'Documentation ratio T1', val: '0.78', foot: `${pillFor('warn', 'Below 0.90')} phone cases / answered calls` },
+      { lab: 'Priority lowered after escalation', val: '11', unit: '%', foot: 'of escalated cases' },
+    ]);
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const grid = days.map((d, di) => Array.from({ length: 24 }, (_, h) => {
+      const us = Math.exp(-Math.pow((h - 15) / 4, 2)) * 2.4, eu = Math.exp(-Math.pow((h - 9) / 3, 2)) * 1.3, ap = Math.exp(-Math.pow((h - 2) / 3, 2)) * 0.6;
+      const wk = di >= 5 ? 0.3 : 1;
+      return Math.max(0.05, (us + eu + ap) * wk + rnd() * 0.25);
+    }));
+    heatmap($('heat'), grid, days);
+    const agents = Array.from({ length: 12 }, (_, i) => ({ label: `Agent T2-${String(i + 1).padStart(2, '0')}`, value: +(0.45 + rnd() * 1.3).toFixed(2) })).sort((a, b) => b.value - a.value);
+    agents[0].value = 1.92;
+    agents.forEach(a => { a.color = a.value >= 1.5 ? 'var(--s2)' : 'var(--s1)'; a.tip = `${a.label}: load index ${a.value}${a.value >= 1.5 ? ' (above 1.5 × median)' : ''}`; });
+    hbars($('load-idx'), agents, { max: 2, ref: 1, fmt: v => (+v).toFixed(1), left: 100 });
+    legend($('fcr-legend'), [['First-contact resolution', 'var(--s1)', 'line'], ['Escalated to Tier 2', 'var(--s2)', 'line']]);
+    lines($('fcr-line'), [{ name: 'FCR', values: fcr, color: 'var(--s1)' }, { name: 'Escalation rate', values: esc2, color: 'var(--s2)' }], weeks, { min: 0, max: 80, fmt: v => Math.round(v) + '%', h: 220 });
+  }
+
+  // ---------- QUALITY ----------
+  function renderQuality() {
+    const vers = [
+      ['Product B 6.4', 14.8, 212], ['Product A 7.2', 11.9, 388], ['Product D 2.1', 10.6, 7], ['Product C 3.1', 9.4, 161], ['Product A 7.1', 7.7, 540],
+      ['Product B 6.3', 6.1, 297], ['Product C 3.0', 5.2, 120], ['Product D 2.0', 4.4, 64], ['Product A 7.0', 3.9, 211], ['Product B 6.2', 3.1, 98],
+    ];
+    hbars($('ver-rate'), vers.map(([l, v, n]) => ({ label: l, value: v, muted: n < 10, tip: `${l}: ${v} cases per 100 assets · ${n} active assets${n < 10 ? ' · small sample' : ''}` })), { fmt: v => (+v).toFixed(1), left: 110, max: 16 });
+    const bugs = [['Product B 6.4', 38], ['Product A 7.2', 24], ['Product C 3.1', 19], ['Product A 7.1', 12], ['Product B 6.3', 9], ['Product C 3.0', 7]];
+    hbars($('bug-share'), bugs.map(([l, v]) => ({ label: l, value: v, color: 'var(--s2)', tip: `${l}: ${v}% of closed cases marked as bug` })), { max: 40, fmt: v => Math.round(v) + '%', left: 110 });
+    const pats = [
+      ['Product B 6.4', 'Image display', 'Viewer freezes on large series', 9, 14, 'Yes', pillFor('crit', 'Rising')],
+      ['Product A 7.2', 'HL7 interface', 'ORU messages rejected', 5, 7, 'Yes', pillFor('warn', 'Stable')],
+      ['Product C 3.1', 'Upgrade install', 'Database migration timeout', 4, 4, 'No', pillFor('warn', 'New')],
+      ['Product A 7.1', 'Login / SSO', 'Token expires early', 3, 5, 'No', pillFor('neutral', 'Falling')],
+    ];
+    table($('patterns'), ['Product / version', 'Subcategory', 'Example subject', 'Hospitals', 'Cases', 'Escalated to R&D', 'Trend'], pats, [3, 4]);
+  }
+
+  // ---------- R&D ----------
+  function renderRnd() {
+    const weeks = Array.from({ length: 12 }, (_, i) => `W${i + 26}`);
+    const inn = weeks.map(() => ri(6, 13)), out = weeks.map(() => ri(5, 11));
+    const net = inn.slice(-4).reduce((a, b) => a + b, 0) - out.slice(-4).reduce((a, b) => a + b, 0);
+    kpis($('rnd-kpis'), [
+      { lab: 'Open in R&D', val: 45, foot: 'P1: 0 · P2: 9' },
+      { lab: 'Median time in R&D', val: '18', unit: 'days', foot: 'closed last 90 days' },
+      { lab: 'Open over 30 days', val: 14, foot: pillFor('warn', '31% of open') },
+      { lab: 'Net flow, last 4 weeks', val: (net > 0 ? '+' : '') + net, foot: net > 0 ? 'more in than out' : 'more out than in' },
+    ]);
+    const rows = [
+      { label: '< 7 d', P1: 0, P2: 3, P3: 5, P4: 2 },
+      { label: '7–30 d', P1: 0, P2: 4, P3: 11, P4: 6 },
+      { label: '30–90 d', P1: 0, P2: 2, P3: 6, P4: 3 },
+      { label: '> 90 d', P1: 0, P2: 0, P3: 2, P4: 1 },
+    ];
+    stackH($('rnd-age'), rows, PRIO, PRIO_C, { left: 64 });
+    legend($('rnd-legend'), PRIO.map((p, i) => [p, PRIO_C[i]]));
+    legend($('flow-legend'), [['Into R&D', 'var(--s2)', 'line'], ['Returned from R&D', 'var(--s1)', 'line']]);
+    lines($('rnd-flow'), [{ name: 'Into R&D', values: inn, color: 'var(--s2)' }, { name: 'Returned', values: out, color: 'var(--s1)' }], weeks, { min: 0, max: 15, h: 220 });
+    const old = [
+      ['P2', 'Product B 6.4', 'Image display', 'TFS 88213', 64, 'Hospital 214'],
+      ['P2', 'Product A 7.2', 'HL7 interface', 'TFS 87940', 47, 'Hospital 087'],
+      ['P3', 'Product C 3.1', 'Report export', 'TFS 88502', 41, 'Hospital 351'],
+      ['P3', 'Product A 7.1', 'Performance', 'TFS 87311', 38, 'Hospital 129'],
+      ['P3', 'Product D 2.0', 'License activation', 'TFS 88677', 33, 'Hospital 402'],
+    ].map(r => [sfLink(nextCase()), r[0] === 'P2' ? pillFor('warn', r[0]) : pillFor('neutral', r[0]), r[1], r[2], `<span style="font-family:var(--mono);font-size:12.5px">${r[3]}</span>`, r[5], `<b>${r[4]}</b>`]);
+    table($('rnd-old'), ['Case', 'Priority', 'Product / version', 'Subcategory', 'Work item', 'Hospital', 'Days in R&D'], old, [6]);
+  }
+
+  // ---------- CUSTOMERS ----------
+  function renderCustomers() {
+    const hs = Array.from({ length: 12 }, () => {
+      const assets = ri(2, 38), cases = Math.max(3, Math.round(assets * (0.6 + rnd() * 1.8))), load = Math.round(cases * (1.8 + rnd() * 1.6));
+      return { name: hospitalName(ri(1, 520)), region: pick(['Americas', 'Americas', 'EMEA', 'EMEA', 'APAC']), assets, cases, load, norm: +(load / assets).toFixed(1), p12: ri(0, Math.ceil(cases / 4)), old: pick(['Product A 7.0', 'Product B 6.2', '', '', '']) };
+    }).sort((a, b) => b.norm - a.norm);
+    const maxN = Math.max(...hs.map(h => h.norm));
+    table($('hosp'), ['Hospital', 'Region', 'Active assets', 'Cases', 'P1/P2', 'Weighted load', 'Normalized load', 'Oldest version in use'], hs.map(h => [
+      `<a href="#" data-tip="Opens the account in Salesforce">${h.name}</a>`, h.region, h.assets, h.cases, h.p12, h.load,
+      `<div class="bar-cell" data-tip="${h.name}: ${h.norm} weighted load per asset"><span class="b" style="width:${Math.round(110 * h.norm / maxN)}px"></span>${h.norm}</div>`,
+      h.old ? pillFor('warn', h.old) : '<span style="color:var(--muted)">current</span>',
+    ]), [2, 3, 4, 5]);
+  }
+
+  // ---------- SAFETY ----------
+  function renderSafety() {
+    kpis($('safety-kpis'), [
+      { lab: 'Flagged, last 90 days', val: 7 },
+      { lab: 'Median case open → flag', val: '3.5', unit: 'h' },
+      { lab: 'Median flag → QARA owner', val: '1.2', unit: 'h', foot: 'target set by QARA procedure' },
+      { lab: 'Waiting on QARA over 5 days', val: 1, foot: pillFor('warn', 'Review') },
+    ]);
+    const rows = [
+      ['Product B 6.4', 'Image display', '2026-09-24', '0.8 h', 'In QARA review', 2],
+      ['Product A 7.2', 'HL7 interface', '2026-09-19', '1.5 h', 'In QARA review', 7],
+      ['Product C 3.1', 'Report export', '2026-09-11', '0.6 h', 'Closed by QARA', 15],
+      ['Product A 7.1', 'Image display', '2026-08-30', '2.1 h', 'Closed by QARA', 27],
+    ].map(r => [sfLink(nextCase()), r[0], r[1], r[2], r[3], r[4].startsWith('In') ? pillFor(r[5] > 5 ? 'warn' : 'neutral', r[4]) : pillFor('good', r[4]), r[5]]);
+    table($('safety-tbl'), ['Case', 'Product / version', 'Subcategory', 'Flagged on', 'Flag → QARA', 'Status', 'Days since flag'], rows, [6]);
+  }
+
+  // ---------- MANAGEMENT REVIEW ----------
+  function renderMr() {
+    kpis($('mr-kpis'), [
+      { lab: 'New cases, September', val: '1,064', foot: '+4% vs August' },
+      { lab: 'SLA compliance', val: '91.8', unit: '%', foot: pillFor('good', 'Target ≥ 90%') },
+      { lab: 'Abandoned calls (adj.)', val: '4.6', unit: '%', foot: pillFor('good', 'Target ≤ 5%') },
+      { lab: 'Backlog over 30 days', val: '13', unit: '%', foot: pillFor('warn', 'Target ≤ 10%') },
+      { lab: 'Open in R&D', val: 45, foot: '14 over 30 days' },
+    ]);
+    const months = ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'];
+    const sla = months.map((_, i) => +(86 + i * 0.45 + rnd() * 2).toFixed(1));
+    legend($('mr-legend'), [['SLA compliance', 'var(--s1)', 'line'], ['Proposed target', 'transparent', 'dash']]);
+    lines($('mr-sla'), [{ name: 'SLA compliance', values: sla, color: 'var(--s1)' }], months, { min: 80, max: 100, target: 90, fmt: v => Math.round(v) + '%', h: 240 });
+    const vol = months.map((_, i) => Math.round(960 + i * 6 + (rnd() - 0.5) * 90)); vol[10] = 1023; vol[11] = 1064;
+    vbars($('mr-vol'), months, vol);
+    table($('mr-top'), ['Version', 'Cases per 100 assets', 'Share marked bug', 'Open in R&D', 'Status'], [
+      ['Product B 6.4', '14.8', '38%', 6, pillFor('crit', 'Escalate to R&D leadership')],
+      ['Product A 7.2', '11.9', '24%', 4, pillFor('warn', 'Watch')],
+      ['Product C 3.1', '9.4', '19%', 3, pillFor('warn', 'Watch')],
+      ['Product A 7.1', '7.7', '12%', 2, pillFor('good', 'Within range')],
+    ], [1, 2, 3]);
+  }
+
+  const renderers = { live: renderLive, load: renderLoad, quality: renderQuality, rnd: renderRnd, customers: renderCustomers, safety: renderSafety, mr: renderMr };
+  const done = {};
+  let current = 'live';
+  const draw = tab => { seed = 20260926 + Object.keys(renderers).indexOf(tab) * 7919; caseNo = 480210; renderers[tab](); };
+  let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => draw(current), 150); });
+  function show(tab) {
+    if (!renderers[tab]) tab = 'live';
+    document.querySelectorAll('nav.tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === tab ? 'true' : 'false'));
+    Object.keys(renderers).forEach(k => { $('p-' + k).hidden = k !== tab; });
+    current = tab;
+    if (!done[tab]) { draw(tab); done[tab] = true; }
+    try { localStorage.setItem('sct-tab', tab); } catch (e) {}
+  }
+  document.querySelectorAll('nav.tabs button').forEach(b => b.addEventListener('click', () => show(b.dataset.tab)));
+  let start = (location.hash || '').slice(1);
+  if (!start) { try { start = localStorage.getItem('sct-tab') || 'live'; } catch (e) { start = 'live'; } }
+  show(start);
+  const mq = window.matchMedia('(prefers-color-scheme: dark)');
+  const redrawHeat = () => { if (current === 'load') draw('load'); else done.load = false; };
+  mq.addEventListener && mq.addEventListener('change', redrawHeat);
+  new MutationObserver(redrawHeat).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+})();
+</script>

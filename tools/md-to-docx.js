@@ -1,7 +1,8 @@
 const fs = require('fs');
 const d = require('docx');
+const path = require('path');
 const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, ShadingType,
-  AlignmentType, HeadingLevel, BorderStyle, LevelFormat, Footer, PageNumber, TableLayoutType } = d;
+  AlignmentType, HeadingLevel, BorderStyle, LevelFormat, Footer, PageNumber, TableLayoutType, ImageRun } = d;
 
 const [, , src, out] = process.argv;
 let lines = fs.readFileSync(src, 'utf8').split('\n')
@@ -91,11 +92,22 @@ while (i < lines.length) {
     continue;
   }
   let m;
+  if ((m = t.match(/^!\[([^\]]*)\]\(([^)]+)\)$/))) {
+    const file = path.resolve(path.dirname(src), m[2]);
+    const buf = fs.readFileSync(file);
+    const pw = buf.readUInt32BE(16), ph = buf.readUInt32BE(20);
+    const w = Math.round(CONTENT_W / 1440 * 96), h = Math.round(w * ph / pw);
+    children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 80, after: 40 }, keepNext: true,
+      children: [new ImageRun({ type: 'png', data: buf, transformation: { width: w, height: h }, altText: { title: m[1], description: m[1], name: m[1] } })] }));
+    children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 200 },
+      children: [new TextRun({ text: m[1] + ' (illustration, synthetic data)', font: FONT, size: 17, color: '808080', italics: true })] }));
+    i++; continue;
+  }
   if ((m = t.match(/^(#{1,3}) (.*)$/))) {
     const lvl = m[1].length;
     const heading = [HeadingLevel.TITLE, HeadingLevel.HEADING_1, HeadingLevel.HEADING_2][lvl - 1];
     children.push(new Paragraph({ heading, bidirectional: true,
-      children: runs(m[2].replace(/\*\*/g, '')), pageBreakBefore: lvl === 2 && children.length > 3 && /^(5|8|10|13|16)\./.test(m[2]) }));
+      children: runs(m[2].replace(/\*\*/g, '')), pageBreakBefore: lvl === 2 && children.length > 3 && /^(5|8|9|13|16)\./.test(m[2]) }));
     i++; continue;
   }
   if (t.startsWith('|')) {
