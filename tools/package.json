@@ -1,0 +1,6 @@
+{
+  "name": "support-system-tools",
+  "private": true,
+  "description": "Build the Word version of the MVP spec: npm install && node md-to-docx.js ../docs/MVP-Support-Control-Tower.md ../docs/MVP-Support-Control-Tower.docx",
+  "dependencies": { "docx": "^9.7.2" }
+}

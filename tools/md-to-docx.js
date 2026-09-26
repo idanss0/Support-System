@@ -40,10 +40,14 @@ function table(rows) {
   const n = header.length;
   const all = [header, ...body];
   const weight = Array.from({ length: n }, (_, i) =>
-    Math.max(6, Math.min(60, Math.max(...all.map(r => (r[i] || '').replace(/\*\*|`/g, '').length)))));
+    Math.max(7, (header[i] || '').length + 2,
+      ...all.map(r => Math.max(0, ...(r[i] || '').replace(/\*\*|`/g, '').split(/\s+/).map(w => w.length + 2))),
+      Math.min(60, Math.max(...all.map(r => (r[i] || '').replace(/\*\*|`/g, '').length)))));
   const sum = weight.reduce((a, b) => a + b, 0);
   const widths = weight.map(w => Math.floor(CONTENT_W * w / sum));
-  widths[n - 1] += CONTENT_W - widths.reduce((a, b) => a + b, 0);
+  const MIN_COL = 950;
+  widths.forEach((w, k) => { if (w < MIN_COL) { widths[k] = MIN_COL; } });
+  widths[widths.indexOf(Math.max(...widths))] += CONTENT_W - widths.reduce((a, b) => a + b, 0);
   const emptyHeader = header.every(h => !h);
   const border = { style: BorderStyle.SINGLE, size: 4, color: 'BFBFBF' };
   const borders = { top: border, bottom: border, left: border, right: border };
@@ -91,7 +95,7 @@ while (i < lines.length) {
     const lvl = m[1].length;
     const heading = [HeadingLevel.TITLE, HeadingLevel.HEADING_1, HeadingLevel.HEADING_2][lvl - 1];
     children.push(new Paragraph({ heading, bidirectional: true,
-      children: runs(m[2].replace(/\*\*/g, '')), pageBreakBefore: lvl === 2 && children.length > 3 && /^(5|8|9|11|13|16)\./.test(m[2]) }));
+      children: runs(m[2].replace(/\*\*/g, '')), pageBreakBefore: lvl === 2 && children.length > 3 && /^(5|8|10|13|16)\./.test(m[2]) }));
     i++; continue;
   }
   if (t.startsWith('|')) {
