@@ -163,7 +163,8 @@ section[role="tabpanel"][hidden] { display: none; }
     <div class="grid">
       <div class="panel c7"><h2>Tier 1 new cases by hour (UTC) <small>average per day, last 8 weeks</small></h2><div id="heat"></div><div class="legend" id="heat-legend"></div></div>
       <div class="panel c5"><h2>Weighted load index, Tier 2 <small>1.0 = tier median</small></h2><div id="load-idx"></div></div>
-      <div class="panel c12"><h2>Tier 1 first-contact resolution and escalation rate <small>weekly</small></h2><div class="legend" id="fcr-legend"></div><div id="fcr-line"></div></div>
+      <div class="panel c7"><h2>Tier 1 first-contact resolution and escalation rate <small>weekly · customer-reported cases only</small></h2><div class="legend" id="fcr-legend"></div><div id="fcr-line"></div></div>
+      <div class="panel c5"><h2>Tier 1 work by case type <small>cases closed, last 30 days</small></h2><div id="case-types"></div><p class="note">Every Tier 1 action is a case. Quality and customer metrics use customer-reported cases only.</p></div>
     </div>
   </section>
 
@@ -245,7 +246,8 @@ section[role="tabpanel"][hidden] { display: none; }
   const NS = 'http://www.w3.org/2000/svg';
   const svgEl = (w, h) => `<svg viewBox="0 0 ${w} ${h}" role="img">`;
   const widthOf = el => Math.max(300, Math.round(el.getBoundingClientRect().width) || 560);
-  const nTicks = range => [5, 4, 3].find(m => Number.isInteger(range / m)) || 4;
+  const isNice = st => { const p = Math.pow(10, Math.floor(Math.log10(st))); return [1, 2, 2.5, 5].some(n => Math.abs(st / p - n) < 1e-9); };
+  const nTicks = range => [4, 5, 3].find(m => isNice(range / m)) || 4;
   const niceMax = v => { const p = Math.pow(10, Math.floor(Math.log10(v))); const m = v / p; return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 2.5 ? 2.5 : m <= 5 ? 5 : 10) * p; };
 
   function hbars(el, items, o = {}) {
@@ -422,7 +424,7 @@ section[role="tabpanel"][hidden] { display: none; }
     const esc2 = weeks.map((_, i) => +(31 - i * 0.25 + rnd() * 2.5).toFixed(1));
     const L = weeks.length - 1;
     kpis($('load-kpis'), [
-      { lab: 'Tier 1 FCR, last week', val: Math.round(fcr[L]), unit: '%', foot: 'baseline period · no target yet' },
+      { lab: 'Tier 1 FCR, last week', val: Math.round(fcr[L]), unit: '%', foot: 'customer-reported cases · no target yet' },
       { lab: 'Escalation rate T1 → T2', val: Math.round(esc2[L]), unit: '%', foot: `${(esc2[L] - esc2[L - 4]).toFixed(1)} pts vs 4 weeks ago` },
       { lab: 'Reopen rate', val: '4.2', unit: '%', foot: pillFor('good', 'Target ≤ 5%') },
       { lab: 'Documentation ratio T1', val: '0.78', foot: `${pillFor('warn', 'Below 0.90')} phone cases / answered calls` },
@@ -441,6 +443,12 @@ section[role="tabpanel"][hidden] { display: none; }
     hbars($('load-idx'), agents, { max: 2, ref: 1, fmt: v => (+v).toFixed(1), left: 100 });
     legend($('fcr-legend'), [['First-contact resolution', 'var(--s1)', 'line'], ['Escalated to Tier 2', 'var(--s2)', 'line']]);
     lines($('fcr-line'), [{ name: 'FCR', values: fcr, color: 'var(--s1)' }, { name: 'Escalation rate', values: esc2, color: 'var(--s2)' }], weeks, { min: 0, max: 80, fmt: v => Math.round(v) + '%', h: 220 });
+    hbars($('case-types'), [
+      { label: 'Customer-reported', value: 610, tip: 'Customer-reported: 610 cases · median handling 1.5 h' },
+      { label: 'Follow-up', value: 220, tip: 'Follow-up: 220 cases · median handling 0.3 h' },
+      { label: 'Proactive monitoring', value: 120, tip: 'Proactive monitoring: 120 cases · median handling 0.8 h' },
+      { label: 'Remote install', value: 50, tip: 'Remote install: 50 cases · median handling 2.9 h' },
+    ], { left: 140, max: 800 });
   }
 
   // ---------- QUALITY ----------
