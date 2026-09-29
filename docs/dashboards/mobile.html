@@ -1,0 +1,195 @@
+<title>Support Control Tower Mobile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Hebrew:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --page: #e9edf1; --surface: #fcfcfd; --surface-2: #eef1f4; --ink: #0e1116; --ink-2: #4b5360; --muted: #7d8591;
+  --grid: #e1e5ea; --ring: rgba(14,17,22,0.10); --accent: #1f5fae; --frame: #1b1f24;
+  --s1: #2a78d6; --s2: #eb6834;
+  --p1: #104281; --p2: #256abf; --p3: #5598e7; --p4: #86b6ef;
+  --good: #0ca30c; --warning: #fab219; --critical: #d03b3b;
+  --good-ink: #006300; --crit-ink: #b02a2a; --warn-ink: #8a5a00;
+  --sans: "IBM Plex Sans", "IBM Plex Sans Hebrew", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0b0d10; --surface: #181b1f; --surface-2: #22262c; --ink: #f4f6f8; --ink-2: #c1c7cf; --muted: #8a929c;
+    --grid: #2a2f36; --ring: rgba(255,255,255,0.10); --accent: #6aa6ee; --frame: #3a4049;
+    --s1: #3987e5; --s2: #d95926;
+    --p1: #cde2fb; --p2: #86b6ef; --p3: #3987e5; --p4: #1c5cab;
+    --good-ink: #0ca30c; --crit-ink: #e66767; --warn-ink: #fab219;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0b0d10; --surface: #181b1f; --surface-2: #22262c; --ink: #f4f6f8; --ink-2: #c1c7cf; --muted: #8a929c;
+  --grid: #2a2f36; --ring: rgba(255,255,255,0.10); --accent: #6aa6ee; --frame: #3a4049;
+  --s1: #3987e5; --s2: #d95926;
+  --p1: #cde2fb; --p2: #86b6ef; --p3: #3987e5; --p4: #1c5cab;
+  --good-ink: #0ca30c; --crit-ink: #e66767; --warn-ink: #fab219;
+}
+* { box-sizing: border-box; }
+body { background: var(--page); color: var(--ink); font-family: var(--sans); font-size: 14px; line-height: 1.4; margin: 0; }
+.wrap { max-width: 1600px; margin: 0 auto; padding-inline: 20px; padding-block: 18px 36px; display: flex; flex-direction: column; gap: 16px; }
+header { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: baseline; justify-content: space-between; }
+header h1 { margin: 0; font-size: 20px; font-weight: 600; }
+header .sub { color: var(--muted); font-size: 13px; }
+.demo { display: inline-flex; gap: 8px; flex-wrap: wrap; font-size: 12.5px; color: var(--warn-ink); background: color-mix(in srgb, var(--warning) 16%, transparent); border: 1px solid color-mix(in srgb, var(--warning) 45%, transparent); padding: 4px 10px; border-radius: 999px; }
+.demo [dir="rtl"] { font-family: "IBM Plex Sans Hebrew", var(--sans); }
+.phones { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 22px; justify-items: center; }
+figure { margin: 0; display: flex; flex-direction: column; gap: 8px; align-items: center; width: 100%; max-width: 330px; }
+figcaption { font-size: 12.5px; color: var(--ink-2); text-align: center; }
+figcaption b { color: var(--ink); display: block; font-size: 13.5px; }
+.phone { width: 100%; max-width: 330px; aspect-ratio: 9 / 19; border: 10px solid var(--frame); border-radius: 38px; background: var(--surface-2); overflow: hidden; display: flex; flex-direction: column; }
+.status { display: flex; justify-content: space-between; padding: 8px 18px 4px; font-size: 11px; font-weight: 600; color: var(--ink); background: var(--surface); }
+.bar { background: var(--surface); border-bottom: 1px solid var(--grid); padding: 8px 14px 10px; display: flex; flex-direction: column; gap: 2px; }
+.bar .t { font-size: 15px; font-weight: 600; }
+.bar .u { font-size: 10.5px; color: var(--muted); font-family: var(--mono); }
+.body { flex: 1; overflow: hidden; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tile { background: var(--surface); border: 1px solid var(--ring); border-radius: 10px; padding: 8px 10px; display: flex; flex-direction: column; gap: 2px; }
+.tile .l { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.tile .v { font-size: 22px; font-weight: 600; line-height: 1.1; }
+.tile .v small { font-size: 12px; font-weight: 400; color: var(--ink-2); margin-inline-start: 2px; }
+.card { background: var(--surface); border: 1px solid var(--ring); border-radius: 10px; padding: 9px 10px; display: flex; flex-direction: column; gap: 6px; }
+.card h3 { margin: 0; font-size: 12.5px; font-weight: 600; display: flex; justify-content: space-between; gap: 6px; }
+.card h3 small { font-weight: 400; color: var(--muted); font-size: 10.5px; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12px; padding-block: 5px; border-bottom: 1px solid var(--grid); }
+.row:last-child { border-bottom: 0; }
+.row .m { display: flex; flex-direction: column; min-width: 0; }
+.row .m span { color: var(--muted); font-size: 10.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row .m a { color: var(--accent); text-decoration: none; font-family: var(--mono); font-size: 12px; }
+.row .r { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+.pill { display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; font-weight: 500; padding: 1px 7px; border-radius: 999px; border: 1px solid; white-space: nowrap; }
+.pill.crit { color: var(--crit-ink); border-color: color-mix(in srgb, var(--critical) 45%, transparent); background: color-mix(in srgb, var(--critical) 10%, transparent); }
+.pill.crit::before { content: "▲"; font-size: 7px; }
+.pill.warn { color: var(--warn-ink); border-color: color-mix(in srgb, var(--warning) 55%, transparent); background: color-mix(in srgb, var(--warning) 14%, transparent); }
+.pill.warn::before { content: "!"; font-weight: 700; }
+.pill.good { color: var(--good-ink); border-color: color-mix(in srgb, var(--good) 40%, transparent); background: color-mix(in srgb, var(--good) 10%, transparent); }
+.pill.good::before { content: "✓"; font-size: 9px; }
+.pill.neutral { color: var(--ink-2); border-color: var(--ring); background: var(--surface-2); }
+.stack { display: flex; height: 12px; border-radius: 0 4px 4px 0; overflow: hidden; gap: 2px; }
+.stack i { display: block; height: 100%; }
+.srow { display: grid; grid-template-columns: 58px 1fr 34px; gap: 8px; align-items: center; font-size: 11.5px; }
+.srow .n { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+.legend { display: flex; gap: 10px; font-size: 10.5px; color: var(--ink-2); }
+.legend i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-inline-end: 4px; }
+.hb { display: grid; grid-template-columns: 92px 1fr 30px; gap: 6px; align-items: center; font-size: 11.5px; }
+.hb .b { height: 9px; border-radius: 0 4px 4px 0; background: var(--s1); }
+.hb .b.hot { background: var(--s2); }
+.hb .n { text-align: right; font-variant-numeric: tabular-nums; }
+.nav { display: grid; grid-template-columns: repeat(4, 1fr); background: var(--surface); border-top: 1px solid var(--grid); padding: 6px 4px 10px; }
+.nav span { font-size: 10px; text-align: center; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.nav span::before { content: ""; width: 18px; height: 3px; border-radius: 2px; background: transparent; }
+.nav span.on { color: var(--accent); font-weight: 600; }
+.nav span.on::before { background: var(--accent); }
+.notif { background: var(--surface); border: 1px solid var(--ring); border-radius: 14px; padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; box-shadow: 0 6px 18px rgba(0,0,0,0.12); }
+.notif .h { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--muted); }
+.notif b { font-size: 12.5px; }
+.notif p { margin: 0; font-size: 12px; color: var(--ink-2); }
+.lock { flex: 1; display: flex; flex-direction: column; gap: 10px; padding: 18px 12px; background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 35%, var(--surface-2)), var(--surface-2)); }
+.lock .clock { text-align: center; font-size: 46px; font-weight: 500; letter-spacing: -0.02em; color: var(--ink); padding-block: 10px 4px; }
+.lock .date { text-align: center; font-size: 13px; color: var(--ink-2); margin-top: -8px; margin-bottom: 8px; }
+.note { font-size: 12px; color: var(--muted); max-width: 900px; margin: 0; }
+</style>
+
+<div class="wrap">
+  <header>
+    <div><h1>Support Control Tower Mobile</h1> <span class="sub">Spotfire mobile pages · phone layout mockup</span></div>
+    <span class="demo"><span>Illustration · synthetic data</span><span dir="rtl">המחשה בלבד, נתונים מומצאים</span></span>
+  </header>
+
+  <div class="phones">
+    <figure>
+      <div class="phone" aria-label="Today screen">
+        <div class="status"><span>09:41</span><span>5G</span></div>
+        <div class="bar"><span class="t">Today</span><span class="u">Salesforce 14:05 UTC</span></div>
+        <div class="body">
+          <div class="tiles">
+            <div class="tile"><span class="l">Open P1</span><span class="v">2</span><span class="pill crit">1 over 4 h</span></div>
+            <div class="tile"><span class="l">SLA at risk</span><span class="v">6</span><span class="pill warn">2 in 30 min</span></div>
+            <div class="tile"><span class="l">Waiting pickup</span><span class="v">3</span><span class="pill neutral">T2: 2 · T3: 1</span></div>
+            <div class="tile"><span class="l">SLA, 30 days</span><span class="v">91.8<small>%</small></span><span class="pill good">Target ≥ 90%</span></div>
+          </div>
+          <div class="card">
+            <h3>Open work by tier <small>current priority</small></h3>
+            <div class="srow"><span>Tier 1</span><div class="stack" style="width:100%"><i style="width:6%;background:var(--p2)"></i><i style="width:54%;background:var(--p3)"></i><i style="width:40%;background:var(--p4)"></i></div><span class="n">710</span></div>
+            <div class="srow"><span>Tier 2</span><div class="stack" style="width:42%"><i style="width:1%;background:var(--p1)"></i><i style="width:13%;background:var(--p2)"></i><i style="width:55%;background:var(--p3)"></i><i style="width:31%;background:var(--p4)"></i></div><span class="n">296</span></div>
+            <div class="srow"><span>Tier 3</span><div class="stack" style="width:17%"><i style="width:2%;background:var(--p1)"></i><i style="width:18%;background:var(--p2)"></i><i style="width:52%;background:var(--p3)"></i><i style="width:28%;background:var(--p4)"></i></div><span class="n">118</span></div>
+            <div class="srow"><span>R&amp;D</span><div class="stack" style="width:7%"><i style="width:20%;background:var(--p2)"></i><i style="width:53%;background:var(--p3)"></i><i style="width:27%;background:var(--p4)"></i></div><span class="n">45</span></div>
+            <div class="legend"><span><i style="background:var(--p1)"></i>P1</span><span><i style="background:var(--p2)"></i>P2</span><span><i style="background:var(--p3)"></i>P3</span><span><i style="background:var(--p4)"></i>P4</span></div>
+          </div>
+        </div>
+        <div class="nav"><span class="on">Today</span><span>Act now</span><span>Load</span><span>Trends</span></div>
+      </div>
+      <figcaption><b>1. Today</b>The whole support picture in one screen</figcaption>
+    </figure>
+
+    <figure>
+      <div class="phone" aria-label="Act now screen">
+        <div class="status"><span>09:41</span><span>5G</span></div>
+        <div class="bar"><span class="t">Act now</span><span class="u">tap a case to open it in Salesforce</span></div>
+        <div class="body">
+          <div class="card">
+            <h3>SLA at risk <small>time left</small></h3>
+            <div class="row"><div class="m"><a href="#">0480233</a><span>Tier 3 · Product B 6.4 · Hospital 214</span></div><div class="r"><span class="pill crit">P1</span> 0:18</div></div>
+            <div class="row"><div class="m"><a href="#">0480249</a><span>Tier 2 · Product A 7.2 · Hospital 087</span></div><div class="r"><span class="pill warn">P2</span> 0:26</div></div>
+            <div class="row"><div class="m"><a href="#">0480289</a><span>Tier 2 · Product C 3.1 · Hospital 351</span></div><div class="r"><span class="pill warn">P2</span> 0:41</div></div>
+            <div class="row"><div class="m"><a href="#">0480326</a><span>Tier 1 · Product A 7.1 · Hospital 402</span></div><div class="r"><span class="pill neutral">P3</span> 1:12</div></div>
+          </div>
+          <div class="card">
+            <h3>Waiting for pickup <small>no owner yet</small></h3>
+            <div class="row"><div class="m"><a href="#">REQ-20931</a><span>to Tier 2</span></div><div class="r"><span class="pill warn">P2</span> 0:47</div></div>
+            <div class="row"><div class="m"><a href="#">REQ-20935</a><span>to Tier 2</span></div><div class="r"><span class="pill neutral">P3</span> 0:22</div></div>
+            <div class="row"><div class="m"><a href="#">REQ-20936</a><span>to Tier 3</span></div><div class="r"><span class="pill neutral">P3</span> 0:09</div></div>
+          </div>
+        </div>
+        <div class="nav"><span>Today</span><span class="on">Act now</span><span>Load</span><span>Trends</span></div>
+      </div>
+      <figcaption><b>2. Act now</b>Short lists that each end in a Salesforce record</figcaption>
+    </figure>
+
+    <figure>
+      <div class="phone" aria-label="Load screen">
+        <div class="status"><span>09:41</span><span>5G</span></div>
+        <div class="bar"><span class="t">Load · Tier 2</span><span class="u">team leads see their own team</span></div>
+        <div class="body">
+          <div class="card">
+            <h3>Weighted load index <small>1.0 = tier median</small></h3>
+            <div class="hb"><span>Agent T2-10</span><div class="b hot" style="width:95%"></div><span class="n">1.9</span></div>
+            <div class="hb"><span>Agent T2-04</span><div class="b" style="width:70%"></div><span class="n">1.4</span></div>
+            <div class="hb"><span>Agent T2-01</span><div class="b" style="width:65%"></div><span class="n">1.3</span></div>
+            <div class="hb"><span>Agent T2-07</span><div class="b" style="width:55%"></div><span class="n">1.1</span></div>
+            <div class="hb"><span>Agent T2-03</span><div class="b" style="width:50%"></div><span class="n">1.0</span></div>
+            <div class="hb"><span>Agent T2-12</span><div class="b" style="width:48%"></div><span class="n">1.0</span></div>
+            <div class="hb"><span>Agent T2-08</span><div class="b" style="width:45%"></div><span class="n">0.9</span></div>
+            <div class="hb"><span>Agent T2-11</span><div class="b" style="width:40%"></div><span class="n">0.8</span></div>
+          </div>
+          <div class="tiles">
+            <div class="tile"><span class="l">T1 FCR, week</span><span class="v">63<small>%</small></span></div>
+            <div class="tile"><span class="l">Escalation T1→T2</span><span class="v">29<small>%</small></span></div>
+          </div>
+        </div>
+        <div class="nav"><span>Today</span><span>Act now</span><span class="on">Load</span><span>Trends</span></div>
+      </div>
+      <figcaption><b>3. Load</b>Who needs help, before the shift ends</figcaption>
+    </figure>
+
+    <figure>
+      <div class="phone" aria-label="Alert on lock screen">
+        <div class="status"><span>03:12</span><span>5G</span></div>
+        <div class="lock">
+          <div class="clock">03:12</div>
+          <div class="date">Tuesday, September 29</div>
+          <div class="notif"><div class="h"><span>SMS</span><span>now</span></div><b>P1 opened · Case 0480402</b><p>Product B 6.4 · Hospital 214 · Tier 1. Open: https://org.lightning.force.com/…</p></div>
+          <div class="notif"><div class="h"><span>Email · Spotfire</span><span>07:00</span></div><b>Daily summary for team leads</b><p>PDF attached · 6 SLA at risk · 3 requests waiting pickup</p></div>
+        </div>
+      </div>
+      <figcaption><b>4. Alerts and reports</b>P1 by SMS and call; scheduled PDFs by email. No patient details.</figcaption>
+    </figure>
+  </div>
+  <p class="note">Screens 1 to 3 are mobile pages inside the same Spotfire analyses, opened in the Spotfire app for iOS or Android. Screen 4 uses channels already in the MVP: SMS and voice for P1 from Salesforce, and scheduled PDF reports by email.</p>
+</div>
