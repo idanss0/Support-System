@@ -39,7 +39,8 @@ header h1 { margin: 0; font-size: 20px; font-weight: 600; }
 header .sub { color: var(--muted); font-size: 13px; }
 .demo { display: inline-flex; gap: 8px; flex-wrap: wrap; font-size: 12.5px; color: var(--warn-ink); background: color-mix(in srgb, var(--warning) 16%, transparent); border: 1px solid color-mix(in srgb, var(--warning) 45%, transparent); padding: 4px 10px; border-radius: 999px; }
 .demo [dir="rtl"] { font-family: "IBM Plex Sans Hebrew", var(--sans); }
-.phones { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 22px; justify-items: center; }
+.phones { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 22px; justify-items: center; }
+@media (min-width: 1000px) { .phones { grid-template-columns: repeat(3, minmax(0, 330px)); justify-content: center; } }
 figure { margin: 0; display: flex; flex-direction: column; gap: 8px; align-items: center; width: 100%; max-width: 330px; }
 figcaption { font-size: 12.5px; color: var(--ink-2); text-align: center; }
 figcaption b { color: var(--ink); display: block; font-size: 13.5px; }
@@ -81,7 +82,7 @@ figcaption b { color: var(--ink); display: block; font-size: 13.5px; }
 .hb .b { height: 9px; border-radius: 0 4px 4px 0; background: var(--s1); }
 .hb .b.hot { background: var(--s2); }
 .hb .n { text-align: right; font-variant-numeric: tabular-nums; }
-.nav { display: grid; grid-template-columns: repeat(4, 1fr); background: var(--surface); border-top: 1px solid var(--grid); padding: 6px 4px 10px; }
+.nav { display: grid; grid-template-columns: repeat(5, 1fr); background: var(--surface); border-top: 1px solid var(--grid); padding: 6px 4px 10px; }
 .nav span { font-size: 10px; text-align: center; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .nav span::before { content: ""; width: 18px; height: 3px; border-radius: 2px; background: transparent; }
 .nav span.on { color: var(--accent); font-weight: 600; }
@@ -93,12 +94,15 @@ figcaption b { color: var(--ink); display: block; font-size: 13.5px; }
 .lock { flex: 1; display: flex; flex-direction: column; gap: 10px; padding: 18px 12px; background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 35%, var(--surface-2)), var(--surface-2)); }
 .lock .clock { text-align: center; font-size: 46px; font-weight: 500; letter-spacing: -0.02em; color: var(--ink); padding-block: 10px 4px; }
 .lock .date { text-align: center; font-size: 13px; color: var(--ink-2); margin-top: -8px; margin-bottom: 8px; }
+.acts { display: flex; gap: 8px; }
+.btn { flex: 1; text-align: center; font-size: 12px; font-weight: 600; padding: 8px 6px; border-radius: 8px; border: 1px solid var(--ring); color: var(--accent); background: var(--surface); }
+.btn.pri { background: var(--accent); color: var(--surface); border-color: var(--accent); }
 .note { font-size: 12px; color: var(--muted); max-width: 900px; margin: 0; }
 </style>
 
 <div class="wrap">
   <header>
-    <div><h1>Support Control Tower Mobile</h1> <span class="sub">Spotfire mobile pages · phone layout mockup</span></div>
+    <div><h1>Support Control Tower Mobile</h1> <span class="sub">Dedicated iOS and Android app · screen mockup</span></div>
     <span class="demo"><span>Illustration · synthetic data</span><span dir="rtl">המחשה בלבד, נתונים מומצאים</span></span>
   </header>
 
@@ -123,7 +127,7 @@ figcaption b { color: var(--ink); display: block; font-size: 13.5px; }
             <div class="legend"><span><i style="background:var(--p1)"></i>P1</span><span><i style="background:var(--p2)"></i>P2</span><span><i style="background:var(--p3)"></i>P3</span><span><i style="background:var(--p4)"></i>P4</span></div>
           </div>
         </div>
-        <div class="nav"><span class="on">Today</span><span>Act now</span><span>Load</span><span>Trends</span></div>
+        <div class="nav"><span class="on">Today</span><span>Act now</span><span>Load</span><span>Insights</span><span>Alerts</span></div>
       </div>
       <figcaption><b>1. Today</b>The whole support picture in one screen</figcaption>
     </figure>
@@ -147,15 +151,15 @@ figcaption b { color: var(--ink); display: block; font-size: 13.5px; }
             <div class="row"><div class="m"><a href="#">REQ-20936</a><span>to Tier 3</span></div><div class="r"><span class="pill neutral">P3</span> 0:09</div></div>
           </div>
         </div>
-        <div class="nav"><span>Today</span><span class="on">Act now</span><span>Load</span><span>Trends</span></div>
+        <div class="nav"><span>Today</span><span class="on">Act now</span><span>Load</span><span>Insights</span><span>Alerts</span></div>
       </div>
-      <figcaption><b>2. Act now</b>Short lists that each end in a Salesforce record</figcaption>
+      <figcaption><b>2. Act now</b>Short lists; each item opens in the Salesforce app</figcaption>
     </figure>
 
     <figure>
       <div class="phone" aria-label="Load screen">
         <div class="status"><span>09:41</span><span>5G</span></div>
-        <div class="bar"><span class="t">Load · Tier 2</span><span class="u">team leads see their own team</span></div>
+        <div class="bar"><span class="t">Load · Tier 2</span><span class="u">team leads see their own team only</span></div>
         <div class="body">
           <div class="card">
             <h3>Weighted load index <small>1.0 = tier median</small></h3>
@@ -173,23 +177,74 @@ figcaption b { color: var(--ink); display: block; font-size: 13.5px; }
             <div class="tile"><span class="l">Escalation T1→T2</span><span class="v">29<small>%</small></span></div>
           </div>
         </div>
-        <div class="nav"><span>Today</span><span>Act now</span><span class="on">Load</span><span>Trends</span></div>
+        <div class="nav"><span>Today</span><span>Act now</span><span class="on">Load</span><span>Insights</span><span>Alerts</span></div>
       </div>
       <figcaption><b>3. Load</b>Who needs help, before the shift ends</figcaption>
     </figure>
 
     <figure>
-      <div class="phone" aria-label="Alert on lock screen">
+      <div class="phone" aria-label="Push alert on lock screen">
         <div class="status"><span>03:12</span><span>5G</span></div>
         <div class="lock">
           <div class="clock">03:12</div>
           <div class="date">Tuesday, September 29</div>
-          <div class="notif"><div class="h"><span>SMS</span><span>now</span></div><b>P1 opened · Case 0480402</b><p>Product B 6.4 · Hospital 214 · Tier 1. Open: https://org.lightning.force.com/…</p></div>
-          <div class="notif"><div class="h"><span>Email · Spotfire</span><span>07:00</span></div><b>Daily summary for team leads</b><p>PDF attached · 6 SLA at risk · 3 requests waiting pickup</p></div>
+          <div class="notif"><div class="h"><span>SUPPORT TOWER</span><span>now</span></div><b>P1 opened · Case 0480402</b><p>Tier 1 · Product B · Tap to acknowledge</p></div>
+          <div class="notif"><div class="h"><span>SUPPORT TOWER</span><span>02:40</span></div><b>SLA at risk · 2 cases</b><p>Tier 2 · due within 30 min</p></div>
         </div>
       </div>
-      <figcaption><b>4. Alerts and reports</b>P1 by SMS and call; scheduled PDFs by email. No patient details.</figcaption>
+      <figcaption><b>4. Push alert</b>No patient details in the notification text</figcaption>
+    </figure>
+
+    <figure>
+      <div class="phone" aria-label="Alerts screen">
+        <div class="status"><span>03:13</span><span>5G</span></div>
+        <div class="bar"><span class="t">Alerts</span><span class="u">acknowledge within 15 min or it escalates</span></div>
+        <div class="body">
+          <div class="card">
+            <h3>P1 · Case 0480402 <small>03:12</small></h3>
+            <div class="row"><div class="m"><span>Product B 6.4 · Hospital 214 · Tier 1</span></div></div>
+            <div class="acts"><span class="btn pri">Acknowledge</span><span class="btn">Open in Salesforce</span></div>
+            <div class="row"><div class="m"><span>Escalates to Tier 1 leads at 03:27</span></div><div class="r"><span class="pill warn">14 min</span></div></div>
+          </div>
+          <div class="card">
+            <h3>Earlier <small>last 24 h</small></h3>
+            <div class="row"><div class="m"><a href="#">0480233</a><span>P1 · acknowledged by you · 21:04</span></div><div class="r"><span class="pill good">Ack</span></div></div>
+            <div class="row"><div class="m"><a href="#">0480198</a><span>P1 · acknowledged by TL Tier 2 · 16:30</span></div><div class="r"><span class="pill good">Ack</span></div></div>
+            <div class="row"><div class="m"><span>SLA at risk · 3 cases · Tier 3 · 11:05</span></div><div class="r"><span class="pill neutral">Info</span></div></div>
+          </div>
+        </div>
+        <div class="nav"><span>Today</span><span>Act now</span><span>Load</span><span>Insights</span><span class="on">Alerts</span></div>
+      </div>
+      <figcaption><b>5. Alerts</b>Acknowledge, open the case, see who already took it</figcaption>
+    </figure>
+
+    <figure>
+      <div class="phone" aria-label="Reports screen">
+        <div class="status"><span>09:41</span><span>5G</span></div>
+        <div class="bar"><span class="t">Insights</span><span class="u">weekly and monthly views · PDF reports</span></div>
+        <div class="body">
+          <div class="card">
+            <h3>Top versions <small>customer-reported per 100 assets, 90 days</small></h3>
+            <div class="hb"><span>Product B 6.4</span><div class="b hot" style="width:95%"></div><span class="n">790</span></div>
+            <div class="hb"><span>Product A 7.2</span><div class="b" style="width:77%"></div><span class="n">640</span></div>
+            <div class="hb"><span>Product C 3.1</span><div class="b" style="width:62%"></div><span class="n">510</span></div>
+          </div>
+          <div class="tiles">
+            <div class="tile"><span class="l">R&amp;D &gt; 30 days</span><span class="v">14</span><span class="pill warn">31% of open</span></div>
+            <div class="tile"><span class="l">Busiest hospital</span><span class="v">157</span><span class="pill neutral">23.8 per asset</span></div>
+          </div>
+          <div class="card">
+            <h3>Reports <small>generated automatically</small></h3>
+            <div class="row"><div class="m"><a href="#">Daily summary</a><span>today 07:00 · PDF</span></div><div class="r"><span class="pill neutral">New</span></div></div>
+            <div class="row"><div class="m"><a href="#">Weekly R&amp;D review</a><span>Mon 06:00 · PDF</span></div></div>
+            <div class="row"><div class="m"><a href="#">Management review, September</a><span>Oct 1 · PDF</span></div></div>
+          </div>
+        </div>
+        <div class="nav"><span>Today</span><span>Act now</span><span>Load</span><span class="on">Insights</span><span>Alerts</span></div>
+      </div>
+      <figcaption><b>6. Insights and reports</b>Trends for meetings, PDF reports in the app</figcaption>
+    </figure>
     </figure>
   </div>
-  <p class="note">Screens 1 to 3 are mobile pages inside the same Spotfire analyses, opened in the Spotfire app for iOS or Android. Screen 4 uses channels already in the MVP: SMS and voice for P1 from Salesforce, and scheduled PDF reports by email.</p>
+  <p class="note">Six screens of a dedicated app for the support manager and team leads. Data comes from the support views in the company data warehouse through the app API; every case and request opens in the Salesforce app.</p>
 </div>

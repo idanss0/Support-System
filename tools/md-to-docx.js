@@ -97,7 +97,9 @@ while (i < lines.length) {
     const file = path.resolve(path.dirname(src), m[2]);
     const buf = fs.readFileSync(file);
     const pw = buf.readUInt32BE(16), ph = buf.readUInt32BE(20);
-    const w = Math.round(CONTENT_W / 1440 * 96), h = Math.round(w * ph / pw);
+    const pct = (m[1].match(/\|(\d+)$/) || [])[1];
+    m[1] = m[1].replace(/\|\d+$/, '');
+    const w = Math.round(CONTENT_W / 1440 * 96 * (pct ? +pct / 100 : 1)), h = Math.round(w * ph / pw);
     children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 80, after: 40 }, keepNext: true,
       children: [new ImageRun({ type: 'png', data: buf, transformation: { width: w, height: h }, altText: { title: m[1], description: m[1], name: m[1] } })] }));
     children.push(new Paragraph({ alignment: AlignmentType.CENTER, bidirectional: true, spacing: { after: 200 },
