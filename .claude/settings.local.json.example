@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python",
+            "args": ["-I", "${CLAUDE_PROJECT_DIR}/tools/obsidian_sync.py", "C:/Obsidian_Vault", "--hook"],
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}
