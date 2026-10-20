@@ -41,6 +41,10 @@ header .sub { color: var(--muted); font-size: 13px; }
 .demo [dir="rtl"] { font-family: "IBM Plex Sans Hebrew", var(--sans); }
 .phones { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 22px; justify-items: center; }
 @media (min-width: 1000px) { .phones { grid-template-columns: repeat(3, minmax(0, 330px)); justify-content: center; } }
+.dots { display: flex; justify-content: center; gap: 6px; padding: 8px 0 12px; background: var(--surface); border-top: 1px solid var(--grid); }
+.dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--grid); }
+.dots i.on { background: var(--accent); }
+.refresh { font-size: 10.5px; color: var(--good-ink); font-family: var(--mono); }
 figure { margin: 0; display: flex; flex-direction: column; gap: 8px; align-items: center; width: 100%; max-width: 330px; }
 figcaption { font-size: 12.5px; color: var(--ink-2); text-align: center; }
 figcaption b { color: var(--ink); display: block; font-size: 13.5px; }
@@ -102,149 +106,73 @@ figcaption b { color: var(--ink); display: block; font-size: 13.5px; }
 
 <div class="wrap">
   <header>
-    <div><h1>Support Control Tower Mobile</h1> <span class="sub">Dedicated iOS and Android app · screen mockup</span></div>
+    <div><h1>Support Control Tower Mobile</h1> <span class="sub">Spotfire app for iOS and Android · mobile page of the live screen</span></div>
     <span class="demo"><span>Illustration · synthetic data</span><span dir="rtl">המחשה בלבד, נתונים מומצאים</span></span>
   </header>
 
   <div class="phones">
     <figure>
-      <div class="phone" aria-label="Today screen">
+      <div class="phone" aria-label="Live page">
         <div class="status"><span>09:41</span><span>5G</span></div>
-        <div class="bar"><span class="t">Today</span><span class="u">Salesforce 14:05 UTC</span></div>
+        <div class="bar"><span class="t">Live</span><span class="u">updated 14:05:30 UTC · auto refresh 30 s</span></div>
         <div class="body">
           <div class="tiles">
             <div class="tile"><span class="l">Open P1</span><span class="v">2</span><span class="pill crit">1 over 4 h</span></div>
             <div class="tile"><span class="l">SLA at risk</span><span class="v">6</span><span class="pill warn">2 in 30 min</span></div>
-            <div class="tile"><span class="l">Waiting pickup</span><span class="v">3</span><span class="pill neutral">T2: 2 · T3: 1</span></div>
-            <div class="tile"><span class="l">SLA, 30 days</span><span class="v">91.8<small>%</small></span><span class="pill good">Target ≥ 90%</span></div>
           </div>
+          <div class="tile"><span class="l">Requests waiting for pickup</span><span class="v">3</span><span class="pill neutral">Tier 2: 2 · Tier 3: 1</span></div>
           <div class="card">
-            <h3>Open work by tier <small>current priority</small></h3>
-            <div class="srow"><span>Tier 1</span><div class="stack" style="width:100%"><i style="width:6%;background:var(--p2)"></i><i style="width:54%;background:var(--p3)"></i><i style="width:40%;background:var(--p4)"></i></div><span class="n">710</span></div>
-            <div class="srow"><span>Tier 2</span><div class="stack" style="width:42%"><i style="width:1%;background:var(--p1)"></i><i style="width:13%;background:var(--p2)"></i><i style="width:55%;background:var(--p3)"></i><i style="width:31%;background:var(--p4)"></i></div><span class="n">296</span></div>
-            <div class="srow"><span>Tier 3</span><div class="stack" style="width:17%"><i style="width:2%;background:var(--p1)"></i><i style="width:18%;background:var(--p2)"></i><i style="width:52%;background:var(--p3)"></i><i style="width:28%;background:var(--p4)"></i></div><span class="n">118</span></div>
-            <div class="srow"><span>R&amp;D</span><div class="stack" style="width:7%"><i style="width:20%;background:var(--p2)"></i><i style="width:53%;background:var(--p3)"></i><i style="width:27%;background:var(--p4)"></i></div><span class="n">45</span></div>
-            <div class="legend"><span><i style="background:var(--p1)"></i>P1</span><span><i style="background:var(--p2)"></i>P2</span><span><i style="background:var(--p3)"></i>P3</span><span><i style="background:var(--p4)"></i>P4</span></div>
+            <h3>Open P1 <small>tap to open in Salesforce</small></h3>
+            <div class="row"><div class="m"><a href="#">0480233</a><span>Tier 3 · Product B 6.4 · Hospital 214</span></div><div class="r"><span class="pill crit">4 h 12 m</span></div></div>
+            <div class="row"><div class="m"><a href="#">0480402</a><span>Tier 1 · Product B 6.4 · Hospital 214</span></div><div class="r"><span class="pill neutral">0 h 18 m</span></div></div>
           </div>
+          <span class="refresh">● live · next refresh in 22 s</span>
         </div>
-        <div class="nav"><span class="on">Today</span><span>Act now</span><span>Load</span><span>Insights</span><span>Alerts</span></div>
+        <div class="dots"><i class="on"></i><i></i><i></i></div>
       </div>
-      <figcaption><b>1. Today</b>The whole support picture in one screen</figcaption>
+      <figcaption><b>1. Live</b>The three numbers that need action now, and the open P1 list</figcaption>
     </figure>
 
     <figure>
-      <div class="phone" aria-label="Act now screen">
+      <div class="phone" aria-label="SLA at risk page">
         <div class="status"><span>09:41</span><span>5G</span></div>
-        <div class="bar"><span class="t">Act now</span><span class="u">tap a case to open it in Salesforce</span></div>
+        <div class="bar"><span class="t">SLA at risk</span><span class="u">sorted by time left</span></div>
         <div class="body">
           <div class="card">
-            <h3>SLA at risk <small>time left</small></h3>
+            <h3>Due within 60 min (P1/P2) or 4 h (P3/P4) <small>time left</small></h3>
             <div class="row"><div class="m"><a href="#">0480233</a><span>Tier 3 · Product B 6.4 · Hospital 214</span></div><div class="r"><span class="pill crit">P1</span> 0:18</div></div>
             <div class="row"><div class="m"><a href="#">0480249</a><span>Tier 2 · Product A 7.2 · Hospital 087</span></div><div class="r"><span class="pill warn">P2</span> 0:26</div></div>
             <div class="row"><div class="m"><a href="#">0480289</a><span>Tier 2 · Product C 3.1 · Hospital 351</span></div><div class="r"><span class="pill warn">P2</span> 0:41</div></div>
             <div class="row"><div class="m"><a href="#">0480326</a><span>Tier 1 · Product A 7.1 · Hospital 402</span></div><div class="r"><span class="pill neutral">P3</span> 1:12</div></div>
-          </div>
-          <div class="card">
-            <h3>Waiting for pickup <small>no owner yet</small></h3>
-            <div class="row"><div class="m"><a href="#">REQ-20931</a><span>to Tier 2</span></div><div class="r"><span class="pill warn">P2</span> 0:47</div></div>
-            <div class="row"><div class="m"><a href="#">REQ-20935</a><span>to Tier 2</span></div><div class="r"><span class="pill neutral">P3</span> 0:22</div></div>
-            <div class="row"><div class="m"><a href="#">REQ-20936</a><span>to Tier 3</span></div><div class="r"><span class="pill neutral">P3</span> 0:09</div></div>
+            <div class="row"><div class="m"><a href="#">0480355</a><span>Tier 2 · Product D 2.0 · Hospital 019</span></div><div class="r"><span class="pill neutral">P3</span> 2:35</div></div>
+            <div class="row"><div class="m"><a href="#">0480367</a><span>Tier 1 · Product B 6.3 · Hospital 276</span></div><div class="r"><span class="pill neutral">P4</span> 3:48</div></div>
           </div>
         </div>
-        <div class="nav"><span>Today</span><span class="on">Act now</span><span>Load</span><span>Insights</span><span>Alerts</span></div>
+        <div class="dots"><i></i><i class="on"></i><i></i></div>
       </div>
-      <figcaption><b>2. Act now</b>Short lists; each item opens in the Salesforce app</figcaption>
+      <figcaption><b>2. SLA at risk</b>Each case opens in the Salesforce app</figcaption>
     </figure>
 
     <figure>
-      <div class="phone" aria-label="Load screen">
+      <div class="phone" aria-label="Waiting for pickup page">
         <div class="status"><span>09:41</span><span>5G</span></div>
-        <div class="bar"><span class="t">Load · Tier 2</span><span class="u">team leads see their own team only</span></div>
+        <div class="bar"><span class="t">Waiting for pickup</span><span class="u">escalation requests still in a queue</span></div>
         <div class="body">
           <div class="card">
-            <h3>Weighted load index <small>1.0 = tier median</small></h3>
-            <div class="hb"><span>Agent T2-10</span><div class="b hot" style="width:95%"></div><span class="n">1.9</span></div>
-            <div class="hb"><span>Agent T2-04</span><div class="b" style="width:70%"></div><span class="n">1.4</span></div>
-            <div class="hb"><span>Agent T2-01</span><div class="b" style="width:65%"></div><span class="n">1.3</span></div>
-            <div class="hb"><span>Agent T2-07</span><div class="b" style="width:55%"></div><span class="n">1.1</span></div>
-            <div class="hb"><span>Agent T2-03</span><div class="b" style="width:50%"></div><span class="n">1.0</span></div>
-            <div class="hb"><span>Agent T2-12</span><div class="b" style="width:48%"></div><span class="n">1.0</span></div>
-            <div class="hb"><span>Agent T2-08</span><div class="b" style="width:45%"></div><span class="n">0.9</span></div>
-            <div class="hb"><span>Agent T2-11</span><div class="b" style="width:40%"></div><span class="n">0.8</span></div>
-          </div>
-          <div class="tiles">
-            <div class="tile"><span class="l">T1 FCR, week</span><span class="v">63<small>%</small></span></div>
-            <div class="tile"><span class="l">Escalation T1→T2</span><span class="v">29<small>%</small></span></div>
-          </div>
-        </div>
-        <div class="nav"><span>Today</span><span>Act now</span><span class="on">Load</span><span>Insights</span><span>Alerts</span></div>
-      </div>
-      <figcaption><b>3. Load</b>Who needs help, before the shift ends</figcaption>
-    </figure>
-
-    <figure>
-      <div class="phone" aria-label="Push alert on lock screen">
-        <div class="status"><span>03:12</span><span>5G</span></div>
-        <div class="lock">
-          <div class="clock">03:12</div>
-          <div class="date">Tuesday, September 29</div>
-          <div class="notif"><div class="h"><span>SUPPORT TOWER</span><span>now</span></div><b>P1 opened · Case 0480402</b><p>Tier 1 · Product B · Tap to acknowledge</p></div>
-          <div class="notif"><div class="h"><span>SUPPORT TOWER</span><span>02:40</span></div><b>SLA at risk · 2 cases</b><p>Tier 2 · due within 30 min</p></div>
-        </div>
-      </div>
-      <figcaption><b>4. Push alert</b>No patient details in the notification text</figcaption>
-    </figure>
-
-    <figure>
-      <div class="phone" aria-label="Alerts screen">
-        <div class="status"><span>03:13</span><span>5G</span></div>
-        <div class="bar"><span class="t">Alerts</span><span class="u">acknowledge within 15 min or it escalates</span></div>
-        <div class="body">
-          <div class="card">
-            <h3>P1 · Case 0480402 <small>03:12</small></h3>
-            <div class="row"><div class="m"><span>Product B 6.4 · Hospital 214 · Tier 1</span></div></div>
-            <div class="acts"><span class="btn pri">Acknowledge</span><span class="btn">Open in Salesforce</span></div>
-            <div class="row"><div class="m"><span>Escalates to Tier 1 leads at 03:27</span></div><div class="r"><span class="pill warn">14 min</span></div></div>
+            <h3>No owner yet <small>waiting</small></h3>
+            <div class="row"><div class="m"><a href="#">REQ-20931</a><span>to Tier 2 · case 0480249</span></div><div class="r"><span class="pill warn">P2</span> 0:47</div></div>
+            <div class="row"><div class="m"><a href="#">REQ-20935</a><span>to Tier 2 · case 0480311</span></div><div class="r"><span class="pill neutral">P3</span> 0:22</div></div>
+            <div class="row"><div class="m"><a href="#">REQ-20936</a><span>to Tier 3 · case 0480297</span></div><div class="r"><span class="pill neutral">P3</span> 0:09</div></div>
           </div>
           <div class="card">
-            <h3>Earlier <small>last 24 h</small></h3>
-            <div class="row"><div class="m"><a href="#">0480233</a><span>P1 · acknowledged by you · 21:04</span></div><div class="r"><span class="pill good">Ack</span></div></div>
-            <div class="row"><div class="m"><a href="#">0480198</a><span>P1 · acknowledged by TL Tier 2 · 16:30</span></div><div class="r"><span class="pill good">Ack</span></div></div>
-            <div class="row"><div class="m"><span>SLA at risk · 3 cases · Tier 3 · 11:05</span></div><div class="r"><span class="pill neutral">Info</span></div></div>
+            <h3>Filter <small>same as on desktop</small></h3>
+            <div class="row"><div class="m"><span>Tier</span></div><div class="r">All tiers ▾</div></div>
           </div>
         </div>
-        <div class="nav"><span>Today</span><span>Act now</span><span>Load</span><span>Insights</span><span class="on">Alerts</span></div>
+        <div class="dots"><i></i><i></i><i class="on"></i></div>
       </div>
-      <figcaption><b>5. Alerts</b>Acknowledge, open the case, see who already took it</figcaption>
-    </figure>
-
-    <figure>
-      <div class="phone" aria-label="Reports screen">
-        <div class="status"><span>09:41</span><span>5G</span></div>
-        <div class="bar"><span class="t">Insights</span><span class="u">weekly and monthly views · PDF reports</span></div>
-        <div class="body">
-          <div class="card">
-            <h3>Top versions <small>customer-reported per 100 assets, 90 days</small></h3>
-            <div class="hb"><span>Product B 6.4</span><div class="b hot" style="width:95%"></div><span class="n">790</span></div>
-            <div class="hb"><span>Product A 7.2</span><div class="b" style="width:77%"></div><span class="n">640</span></div>
-            <div class="hb"><span>Product C 3.1</span><div class="b" style="width:62%"></div><span class="n">510</span></div>
-          </div>
-          <div class="tiles">
-            <div class="tile"><span class="l">R&amp;D &gt; 30 days</span><span class="v">14</span><span class="pill warn">31% of open</span></div>
-            <div class="tile"><span class="l">Busiest hospital</span><span class="v">157</span><span class="pill neutral">23.8 per asset</span></div>
-          </div>
-          <div class="card">
-            <h3>Reports <small>generated automatically</small></h3>
-            <div class="row"><div class="m"><a href="#">Daily summary</a><span>today 07:00 · PDF</span></div><div class="r"><span class="pill neutral">New</span></div></div>
-            <div class="row"><div class="m"><a href="#">Weekly R&amp;D review</a><span>Mon 06:00 · PDF</span></div></div>
-            <div class="row"><div class="m"><a href="#">Management review, September</a><span>Oct 1 · PDF</span></div></div>
-          </div>
-        </div>
-        <div class="nav"><span>Today</span><span>Act now</span><span>Load</span><span class="on">Insights</span><span>Alerts</span></div>
-      </div>
-      <figcaption><b>6. Insights and reports</b>Trends for meetings, PDF reports in the app</figcaption>
-    </figure>
+      <figcaption><b>3. Waiting for pickup</b>Requests sitting in a queue, by waiting time</figcaption>
     </figure>
   </div>
-  <p class="note">Six screens of a dedicated app for the support manager and team leads. Data comes from the support views in the company data warehouse through the app API; every case and request opens in the Salesforce app.</p>
+  <p class="note">Three mobile pages inside the same Spotfire analysis as the desktop live screen, opened in the Spotfire app for iOS or Android. Same data, same permissions, same 30 to 60 second automatic refresh while the page is open. Swipe between pages.</p>
 </div>
