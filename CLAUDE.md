@@ -20,4 +20,5 @@ After every implementation, run and report the actual results:
 
 ## Documentation
 - Keep the project notes in Obsidian up to date after every change.
-- The hook that updates Obsidian automatically is not set up yet. Until it is, update the notes as part of each change.
+- The source of the notes is in the repo: `docs/*.md` (converted automatically) and `obsidian/*.md` (the hub note and the decisions note, edited by hand). When a decision or a document changes, update `obsidian/` in the same change.
+- On the Windows machine, a Stop hook in `.claude/settings.local.json` runs `tools/obsidian_sync.py` after every response and copies the notes to `C:\Obsidian_Vault\מערכת מעקב תמיכה טכנית\`. The hook does not run in cloud sessions; there, run the script by hand or rely on the next local session.
