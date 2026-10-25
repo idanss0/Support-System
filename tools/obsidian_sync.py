@@ -27,7 +27,7 @@ import time
 from pathlib import Path
 
 PROJECT_FOLDER = 'מערכת מעקב תמיכה טכנית'
-GH = 'https://github.com/idanss0/Support-System/tree/claude/support-tracking-system-mvp-e26kbf'
+GH = 'https://github.com/idanss0/Support-System/tree/main'
 DOCS = [
     # (source md in docs/, note title, status, pdf in docs/)
     ('MVP-Short.md', 'MVP מקוצר - מסך חי', 'התוכנית הנוכחית', 'MVP-Short.pdf'),
