@@ -1,0 +1,499 @@
+<title>Control Tower Live Screen</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Hebrew:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Same tokens as index.html and mobile.html, so the three mockups read as one product.
+   Layout: one toolbar, three action tiles, then the two work lists; the phone view shows the same data in three frames. */
+:root {
+  --page: #f2f4f6; --surface: #fcfcfd; --surface-2: #eef1f4;
+  --ink: #0e1116; --ink-2: #4b5360; --muted: #7d8591;
+  --grid: #e1e5ea; --ring: rgba(14,17,22,0.10); --frame: #1b1f24;
+  --accent: #1f5fae;
+  --good: #0ca30c; --warning: #fab219; --critical: #d03b3b;
+  --good-ink: #006300; --crit-ink: #b02a2a; --warn-ink: #8a5a00;
+  --toast-bg: #0e1116; --toast-ink: #ffffff;
+  --sans: "IBM Plex Sans", "IBM Plex Sans Hebrew", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0f1114; --surface: #181b1f; --surface-2: #22262c;
+    --ink: #f4f6f8; --ink-2: #c1c7cf; --muted: #8a929c;
+    --grid: #2a2f36; --ring: rgba(255,255,255,0.10); --frame: #3a4049;
+    --accent: #6aa6ee;
+    --good-ink: #0ca30c; --crit-ink: #e66767; --warn-ink: #fab219;
+    --toast-bg: #f4f6f8; --toast-ink: #0e1116;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0f1114; --surface: #181b1f; --surface-2: #22262c;
+  --ink: #f4f6f8; --ink-2: #c1c7cf; --muted: #8a929c;
+  --grid: #2a2f36; --ring: rgba(255,255,255,0.10); --frame: #3a4049;
+  --accent: #6aa6ee;
+  --good-ink: #0ca30c; --crit-ink: #e66767; --warn-ink: #fab219;
+  --toast-bg: #f4f6f8; --toast-ink: #0e1116;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--page); color: var(--ink); font-family: var(--sans); font-size: 14px; line-height: 1.45; margin: 0; }
+.wrap { max-width: 1320px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 16px 40px; display: flex; flex-direction: column; gap: 14px; }
+header.top { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px; justify-content: space-between; }
+.brand { display: flex; align-items: baseline; gap: 6px 12px; flex-wrap: wrap; }
+.brand h1 { font-size: 20px; font-weight: 600; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+.brand .sub { color: var(--muted); font-size: 13px; }
+.demo { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 12.5px; color: var(--warn-ink); background: color-mix(in srgb, var(--warning) 16%, transparent); border: 1px solid color-mix(in srgb, var(--warning) 45%, transparent); padding: 4px 10px; border-radius: 999px; }
+.demo [dir="rtl"] { font-family: "IBM Plex Sans Hebrew", var(--sans); }
+
+.toolbar { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; }
+.seg { display: inline-flex; border: 1px solid var(--ring); border-radius: 7px; overflow: hidden; background: var(--surface); }
+.seg button { font: inherit; font-size: 13px; color: var(--ink-2); background: none; border: 0; padding: 5px 12px; cursor: pointer; }
+.seg button + button { border-inline-start: 1px solid var(--ring); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--surface); font-weight: 600; }
+.toolbar label { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.toolbar select { font: inherit; font-size: 13px; text-transform: none; letter-spacing: 0; color: var(--ink); background: var(--surface); border: 1px solid var(--ring); border-radius: 6px; padding: 4px 8px; }
+.live { margin-inline-start: auto; display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; font-size: 12px; font-family: var(--mono); color: var(--muted); }
+.live .dot { display: inline-flex; align-items: center; gap: 6px; color: var(--good-ink); }
+.live .dot::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.live.paused .dot { color: var(--muted); }
+.live.stale .dot, .live.stale .asof { color: var(--crit-ink); }
+button:focus-visible, select:focus-visible, a:focus-visible, .kpi:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.banner { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; padding: 10px 14px; border-radius: 8px; border: 1px solid color-mix(in srgb, var(--critical) 45%, transparent); background: color-mix(in srgb, var(--critical) 10%, var(--surface)); color: var(--crit-ink); font-size: 13.5px; }
+.banner b { font-weight: 600; }
+.banner span { color: var(--ink-2); }
+
+.kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 640px) { .kpis { grid-template-columns: minmax(0, 1fr); } }
+.kpi { background: var(--surface); border: 1px solid var(--ring); border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; text-align: left; font: inherit; color: inherit; }
+button.kpi { cursor: pointer; }
+button.kpi:hover { border-color: var(--accent); }
+button.kpi[aria-expanded="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.kpi .lab { font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; display: flex; justify-content: space-between; gap: 8px; }
+.kpi .val { font-size: 30px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.kpi .foot { font-size: 12px; color: var(--ink-2); display: flex; gap: 6px; align-items: center; flex-wrap: wrap; min-height: 20px; }
+.kpi.changed .val { color: var(--accent); }
+@media (prefers-reduced-motion: no-preference) { .kpi .val { transition: color .6s; } }
+
+.grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 12px; }
+.panel { background: var(--surface); border: 1px solid var(--ring); border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.panel h2 { font-size: 13.5px; font-weight: 600; margin: 0; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 10px; align-items: baseline; }
+.panel h2 small { font-weight: 400; color: var(--muted); font-size: 12px; }
+.c12 { grid-column: span 12; } .c8 { grid-column: span 8; } .c4 { grid-column: span 4; }
+@media (max-width: 1000px) { .c8, .c4 { grid-column: span 12; } }
+
+.pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 500; padding: 1px 8px 1px 6px; border-radius: 999px; border: 1px solid; white-space: nowrap; }
+.pill.crit { color: var(--crit-ink); border-color: color-mix(in srgb, var(--critical) 45%, transparent); background: color-mix(in srgb, var(--critical) 10%, transparent); }
+.pill.crit::before { content: "▲"; font-size: 8px; }
+.pill.warn { color: var(--warn-ink); border-color: color-mix(in srgb, var(--warning) 55%, transparent); background: color-mix(in srgb, var(--warning) 14%, transparent); }
+.pill.warn::before { content: "!"; font-weight: 700; font-size: 11px; }
+.pill.good { color: var(--good-ink); border-color: color-mix(in srgb, var(--good) 40%, transparent); background: color-mix(in srgb, var(--good) 10%, transparent); }
+.pill.good::before { content: "✓"; font-size: 10px; }
+.pill.neutral { color: var(--ink-2); border-color: var(--ring); background: var(--surface-2); padding-inline-start: 8px; }
+
+.tbl { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; font-weight: 500; font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; padding: 6px 8px; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+td { padding: 7px 8px; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+tr:last-child td { border-bottom: 0; }
+tr.new td { background: color-mix(in srgb, var(--accent) 8%, transparent); }
+.sf { color: var(--accent); text-decoration: none; font-family: var(--mono); font-size: 12.5px; }
+.sf:hover { text-decoration: underline; }
+.t-crit { color: var(--crit-ink); font-weight: 600; }
+.t-warn { color: var(--warn-ink); font-weight: 600; }
+.empty { display: flex; align-items: center; gap: 8px; color: var(--ink-2); font-size: 13px; padding: 10px 2px; }
+.more { font-size: 12px; color: var(--muted); margin: 0; }
+
+.demo-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 10px 14px; border: 1px dashed var(--ring); border-radius: 8px; background: var(--surface-2); }
+.demo-bar .t { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; margin-inline-end: 4px; }
+.demo-bar button { font: inherit; font-size: 13px; color: var(--ink); background: var(--surface); border: 1px solid var(--ring); border-radius: 6px; padding: 4px 10px; cursor: pointer; }
+.demo-bar button:hover { border-color: var(--accent); }
+.demo-bar p { flex-basis: 100%; margin: 0; font-size: 12px; color: var(--muted); }
+
+details.defs { font-size: 12.5px; color: var(--ink-2); }
+details.defs summary { cursor: pointer; color: var(--ink); font-weight: 500; }
+details.defs dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 14px; margin: 10px 0 0; }
+details.defs dt { font-weight: 600; color: var(--ink); }
+details.defs dd { margin: 0; }
+@media (max-width: 640px) { details.defs dl { grid-template-columns: minmax(0, 1fr); } details.defs dd { margin-bottom: 6px; } }
+
+/* phone view */
+.phones { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 22px; justify-items: center; }
+@media (min-width: 1000px) { .phones { grid-template-columns: repeat(3, minmax(0, 330px)); justify-content: center; } }
+figure { margin: 0; display: flex; flex-direction: column; gap: 8px; align-items: center; width: 100%; max-width: 330px; }
+figcaption { font-size: 12.5px; color: var(--ink-2); text-align: center; }
+figcaption b { color: var(--ink); display: block; font-size: 13.5px; }
+.phone { width: 100%; max-width: 330px; aspect-ratio: 9 / 19; border: 10px solid var(--frame); border-radius: 38px; background: var(--surface-2); overflow: hidden; display: flex; flex-direction: column; }
+.ph-status { display: flex; justify-content: space-between; padding: 8px 18px 4px; font-size: 11px; font-weight: 600; background: var(--surface); }
+.ph-bar { background: var(--surface); border-bottom: 1px solid var(--grid); padding: 8px 14px 10px; display: flex; flex-direction: column; gap: 2px; }
+.ph-bar .t { font-size: 15px; font-weight: 600; }
+.ph-bar .u { font-size: 10.5px; color: var(--muted); font-family: var(--mono); }
+.ph-bar.stale .u { color: var(--crit-ink); }
+.ph-body { flex: 1; overflow: hidden; padding: 10px; display: flex; flex-direction: column; gap: 8px; min-height: 0; }
+.ph-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ph-tile { background: var(--surface); border: 1px solid var(--ring); border-radius: 10px; padding: 8px 10px; display: flex; flex-direction: column; gap: 3px; align-items: flex-start; }
+.ph-tile .l { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.ph-tile .v { font-size: 22px; font-weight: 600; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.ph-tile .pill { font-size: 10.5px; padding: 0 7px 0 5px; }
+.ph-card { background: var(--surface); border: 1px solid var(--ring); border-radius: 10px; padding: 9px 10px; display: flex; flex-direction: column; gap: 4px; min-height: 0; }
+.ph-card h3 { margin: 0; font-size: 12.5px; font-weight: 600; display: flex; justify-content: space-between; gap: 6px; }
+.ph-card h3 small { font-weight: 400; color: var(--muted); font-size: 10.5px; }
+.ph-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12px; padding-block: 5px; border-bottom: 1px solid var(--grid); }
+.ph-row:last-of-type { border-bottom: 0; }
+.ph-row .m { display: flex; flex-direction: column; min-width: 0; }
+.ph-row .m span { color: var(--muted); font-size: 10.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ph-row .r { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+.ph-row .sf { font-size: 12px; }
+.ph-foot { font-size: 10.5px; font-family: var(--mono); color: var(--good-ink); }
+.ph-foot.paused { color: var(--muted); }
+.ph-foot.stale { color: var(--crit-ink); }
+.ph-warn { font-size: 11px; color: var(--crit-ink); background: color-mix(in srgb, var(--critical) 10%, var(--surface)); border: 1px solid color-mix(in srgb, var(--critical) 45%, transparent); border-radius: 8px; padding: 6px 8px; }
+.ph-dots { display: flex; justify-content: center; gap: 6px; padding: 8px 0 12px; background: var(--surface); border-top: 1px solid var(--grid); }
+.ph-dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--grid); }
+.ph-dots i.on { background: var(--accent); }
+
+#toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--toast-bg); color: var(--toast-ink); font-size: 13px; padding: 9px 14px; border-radius: 8px; max-width: min(520px, calc(100vw - 32px)); z-index: 20; box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><h1>Support Control Tower</h1><span class="sub">Live screen for team leads · MVP 2.4</span></div>
+    <span class="demo"><span>Demo · synthetic data, no database</span><span dir="rtl">הדגמה בלבד, נתונים מומצאים</span></span>
+  </header>
+
+  <div class="toolbar">
+    <div class="seg" role="group" aria-label="View">
+      <button type="button" id="view-desktop" aria-pressed="true">Desktop and wall screen</button>
+      <button type="button" id="view-phone" aria-pressed="false">Phone</button>
+    </div>
+    <label for="tier">Tier
+      <select id="tier">
+        <option value="all">All tiers</option>
+        <option value="1">Tier 1</option>
+        <option value="2">Tier 2</option>
+        <option value="3">Tier 3</option>
+        <option value="4">Tier 4 R&amp;D</option>
+      </select>
+    </label>
+    <div class="live" id="live" aria-live="polite">
+      <span class="dot" id="live-state">Live</span>
+      <span class="asof" id="asof">Data as of --:--:-- UTC</span>
+      <span id="next">next refresh in 30 s</span>
+    </div>
+  </div>
+
+  <div class="banner" id="stale" role="alert" hidden>
+    <b id="stale-text">Data is 6 min old.</b>
+    <span>The screen is not getting new data from the DW. Check the connection before acting on these numbers.</span>
+  </div>
+
+  <section id="desktop">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="kpis">
+        <button type="button" class="kpi" id="k-p1" aria-expanded="false" aria-controls="p1-panel">
+          <span class="lab"><span>Open P1</span><span>show list</span></span>
+          <span class="val" id="k-p1-v">0</span>
+          <span class="foot" id="k-p1-f"></span>
+        </button>
+        <div class="kpi" id="k-risk">
+          <span class="lab"><span>SLA at risk</span></span>
+          <span class="val" id="k-risk-v">0</span>
+          <span class="foot" id="k-risk-f"></span>
+        </div>
+        <div class="kpi" id="k-pick">
+          <span class="lab"><span>Requests waiting for pickup</span></span>
+          <span class="val" id="k-pick-v">0</span>
+          <span class="foot" id="k-pick-f"></span>
+        </div>
+      </div>
+
+      <div class="panel" id="p1-panel" hidden>
+        <h2>Open P1 <small>current priority P1, oldest first</small></h2>
+        <div class="tbl" id="p1-list"></div>
+      </div>
+
+      <div class="grid">
+        <div class="panel c8"><h2>SLA at risk <small>milestone due within 60 min (P1/P2) or 4 h (P3/P4), least time left first</small></h2><div class="tbl" id="risk-list"></div></div>
+        <div class="panel c4"><h2>Waiting for pickup <small>escalation request owned by a queue, longest wait first</small></h2><div class="tbl" id="pick-list"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="phone" hidden>
+    <div class="phones" id="phones"></div>
+  </section>
+
+  <div class="demo-bar">
+    <span class="t">Demo controls</span>
+    <button type="button" id="b-pause">Pause refresh</button>
+    <button type="button" id="b-now">Refresh now</button>
+    <button type="button" id="b-stale">Simulate a stalled feed</button>
+    <p>These buttons exist only in the demo. The real screen refreshes on its own every 30-60 seconds from the DW, and shows the red warning when its data is more than 5 minutes old.</p>
+  </div>
+
+  <details class="defs">
+    <summary>Definitions used on this screen</summary>
+    <dl>
+      <dt>Open P1</dt><dd>An open case whose current priority is P1.</dd>
+      <dt>SLA at risk</dt><dd>An open milestone whose target time is within 60 minutes (P1/P2) or 4 hours (P3/P4). The SLA comes from Salesforce as is; the screen does not recalculate it.</dd>
+      <dt>Waiting for pickup</dt><dd>An open escalation request whose owner is a queue, not a person. The wait counts from when the request was opened.</dd>
+      <dt>Tier</dt><dd>The tier of the latest open request on the case, or Tier 1 when there is none. For a request, the tier it was sent to.</dd>
+      <dt>Case and request links</dt><dd>In the real screen, each number opens the record in Salesforce. Here they only show a message.</dd>
+    </dl>
+  </details>
+</div>
+
+<div id="toast" role="status" hidden></div>
+
+<script>
+(() => {
+  'use strict';
+  // ---------- synthetic data, generated in the page (no database, no network) ----------
+  let seed = 20261025;
+  const rnd = () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  const ri = (a, b) => a + Math.floor(rnd() * (b - a + 1));
+  const pick = a => a[Math.floor(rnd() * a.length)];
+  const weighted = pairs => { let r = rnd() * pairs.reduce((s, p) => s + p[1], 0); for (const [v, w] of pairs) { if ((r -= w) < 0) return v; } return pairs[0][0]; };
+
+  const MIN = 60000, REFRESH_S = 30, STALE_MIN = 5;
+  const WINDOW = { P1: 60, P2: 60, P3: 240, P4: 240 };
+  const PRODUCTS = ['Product A 7.2', 'Product A 7.1', 'Product B 6.4', 'Product B 6.3', 'Product C 3.1', 'Product D 2.0'];
+  const MILESTONES = ['First response', 'Resolution', 'Customer update'];
+  let caseNo = 480210, reqNo = 20930;
+  const nextCase = () => '0' + (caseNo += ri(3, 40));
+  const nextReq = () => 'REQ-' + (reqNo += ri(1, 4));
+  const hospital = () => 'Hospital ' + String(ri(1, 520)).padStart(3, '0');
+  const tierOfCase = () => weighted([[1, 45], [2, 30], [3, 18], [4, 7]]);
+
+  // simulated clock: the demo starts at 14:05 UTC on 2026-10-25 and runs in real time
+  const BASE = Date.UTC(2026, 9, 25, 14, 5, 0);
+  let simOffset = 0;
+  const t0 = Date.now();
+  const simNow = () => BASE + (Date.now() - t0) + simOffset;
+
+  const S = { dataTime: BASE, p1: [], risk: [], pick: [], fresh: new Set() };
+
+  function newCase(prio, tier) {
+    return { id: nextCase(), prio, tier: tier || tierOfCase(), product: pick(PRODUCTS), hospital: hospital() };
+  }
+  function addRisk(now, c, dueInMin) {
+    S.risk.push({ c, milestone: pick(MILESTONES), due: now + dueInMin * MIN });
+  }
+  function seedData(now) {
+    S.p1 = [
+      { ...newCase('P1', 3), opened: now - 252 * MIN },
+      { ...newCase('P1', 1), opened: now - 18 * MIN },
+    ];
+    addRisk(now, S.p1[1], 22);
+    [['P2', 9], ['P2', 26], ['P3', 41], ['P2', 48], ['P3', 95], ['P4', 155], ['P3', 210]].forEach(([p, m]) => addRisk(now, newCase(p), m));
+    [[2, 'P2', 47], [2, 'P3', 22], [3, 'P3', 9], [4, 'P2', 4]].forEach(([t, p, w]) => S.pick.push({ id: nextReq(), caseId: nextCase(), tier: t, prio: p, opened: now - w * MIN }));
+  }
+
+  // one refresh: what changed in Salesforce during the last 30 seconds
+  function evolve(now) {
+    S.fresh = new Set();
+    const mark = o => { S.fresh.add(o); return o; };
+    S.risk = S.risk.filter(r => r.due > now && rnd() > 0.06);           // breached, or completed in Salesforce
+    if (S.risk.length < 14 && rnd() < 0.5) {
+      const p = weighted([['P1', 4], ['P2', 26], ['P3', 45], ['P4', 25]]);
+      const c = p === 'P1' && S.p1.length ? pick(S.p1) : newCase(p);
+      const r = { c, milestone: pick(MILESTONES), due: now + (WINDOW[p] - ri(0, 3)) * MIN };
+      S.risk.push(mark(r));
+    }
+    if (S.p1.length && rnd() < 0.05) S.p1.splice(ri(0, S.p1.length - 1), 1);  // P1 resolved or downgraded
+    if (S.p1.length < 4 && rnd() < 0.05) {
+      const c = mark({ ...newCase('P1'), opened: now - ri(0, 1) * MIN });
+      S.p1.push(c);
+      addRisk(now, c, 30); S.fresh.add(S.risk[S.risk.length - 1]);
+    }
+    S.pick = S.pick.filter(() => rnd() > 0.12);                           // picked up by a person
+    if (S.pick.length < 10 && rnd() < 0.35) {
+      S.pick.push(mark({ id: nextReq(), caseId: nextCase(), tier: weighted([[2, 60], [3, 30], [4, 10]]), prio: weighted([['P1', 3], ['P2', 30], ['P3', 50], ['P4', 17]]), opened: now }));
+    }
+  }
+
+  // ---------- view state ----------
+  const V = { view: 'desktop', tier: 'all', paused: false, stalled: false, showP1: false, nextAt: Date.now() + REFRESH_S * 1000, prev: {} };
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+  const hm = ms => { const m = Math.max(0, Math.floor(ms / MIN)); return Math.floor(m / 60) + ':' + String(m % 60).padStart(2, '0'); };
+  const hhmm = (t, sec) => new Date(t).toISOString().slice(11, sec ? 19 : 16);
+  const tierName = t => t === 4 ? 'Tier 4 R&D' : 'Tier ' + t;
+  const prioPill = p => `<span class="pill ${p === 'P1' ? 'crit' : p === 'P2' ? 'warn' : 'neutral'}">${esc(p)}</span>`;
+  const sfLink = (id, kind) => `<a href="#" class="sf" data-sf="${esc(kind)}" data-id="${esc(id)}">${esc(id)}</a>`;
+  const leftClass = m => m <= 15 ? 't-crit' : m <= 30 ? 't-warn' : '';
+  const byTier = t => V.tier === 'all' || String(t) === V.tier;
+
+  function views(now) {
+    const p1 = S.p1.filter(c => byTier(c.tier)).sort((a, b) => a.opened - b.opened);
+    const risk = S.risk.filter(r => r.due > now && (r.due - now) <= WINDOW[r.c.prio] * MIN && byTier(r.c.tier)).sort((a, b) => a.due - b.due);
+    const pick = S.pick.filter(r => byTier(r.tier)).sort((a, b) => a.opened - b.opened);
+    return { p1, risk, pick };
+  }
+
+  function table(el, head, rows, numCols, emptyText) {
+    if (!rows.length) { el.innerHTML = `<div class="empty"><span class="pill good">Clear</span>${esc(emptyText)}</div>`; return; }
+    el.innerHTML = `<table><thead><tr>${head.map((h, i) => `<th${numCols.includes(i) ? ' class="num"' : ''}>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr${r.isNew ? ' class="new"' : ''}>${r.cells.map((c, i) => `<td${numCols.includes(i) ? ' class="num"' : ''}>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+  }
+
+  function setKpi(key, val, foot) {
+    const v = $(key + '-v'), card = v.closest('.kpi');
+    if (V.prev[key] !== undefined && V.prev[key] !== val) { card.classList.add('changed'); setTimeout(() => card.classList.remove('changed'), 2500); }
+    V.prev[key] = val; v.textContent = val; $(key + '-f').innerHTML = foot;
+  }
+
+  function renderDesktop(d, now) {
+    const over4 = d.p1.filter(c => now - c.opened >= 240 * MIN).length;
+    setKpi('k-p1', d.p1.length, d.p1.length ? (over4 ? `<span class="pill crit">${over4} open over 4 h</span>` : '<span class="pill neutral">none over 4 h</span>') : '<span class="pill good">No open P1</span>');
+    const in30 = d.risk.filter(r => r.due - now <= 30 * MIN).length;
+    setKpi('k-risk', d.risk.length, d.risk.length ? (in30 ? `<span class="pill warn">${in30} due in 30 min</span>` : '<span class="pill neutral">none due in 30 min</span>') : '<span class="pill good">Nothing at risk</span>');
+    const byT = [2, 3, 4].map(t => [t, d.pick.filter(r => r.tier === t).length]).filter(x => x[1]);
+    setKpi('k-pick', d.pick.length, d.pick.length ? esc(byT.map(([t, n]) => `${tierName(t)}: ${n}`).join(' · ')) : '<span class="pill good">All picked up</span>');
+
+    $('k-p1').setAttribute('aria-expanded', String(V.showP1));
+    $('p1-panel').hidden = !V.showP1;
+    table($('p1-list'), ['Case', 'Tier', 'Product / version', 'Hospital', 'Open for'], d.p1.map(c => ({ isNew: S.fresh.has(c), cells: [
+      sfLink(c.id, 'case'), esc(tierName(c.tier)), esc(c.product), esc(c.hospital),
+      now - c.opened >= 240 * MIN ? `<span class="pill crit">${hm(now - c.opened)}</span>` : hm(now - c.opened),
+    ] })), [4], 'No open P1 cases.');
+    table($('risk-list'), ['Case', 'Priority', 'Tier', 'Product / version', 'Hospital', 'Milestone', 'Time left'], d.risk.map(r => {
+      const m = Math.floor((r.due - now) / MIN);
+      return { isNew: S.fresh.has(r), cells: [sfLink(r.c.id, 'case'), prioPill(r.c.prio), esc(tierName(r.c.tier)), esc(r.c.product), esc(r.c.hospital), esc(r.milestone), `<span class="${leftClass(m)}">${hm(r.due - now)}</span>`] };
+    }), [6], 'No milestone is due inside its window.');
+    table($('pick-list'), ['Request', 'Case', 'To tier', 'Priority', 'Waiting'], d.pick.map(r => {
+      const m = Math.floor((now - r.opened) / MIN);
+      return { isNew: S.fresh.has(r), cells: [sfLink(r.id, 'request'), sfLink(r.caseId, 'case'), esc(tierName(r.tier)), prioPill(r.prio), `<span class="${m >= 30 ? 't-warn' : ''}">${hm(now - r.opened)}</span>`] };
+    }), [4], 'Every escalation request has an owner.');
+  }
+
+  const PH_ROWS = 6;
+  function phRows(items, row) {
+    if (!items.length) return '<div class="empty"><span class="pill good">Clear</span>Nothing here now.</div>';
+    const shown = items.slice(0, PH_ROWS).map(row).join('');
+    return shown + (items.length > PH_ROWS ? `<p class="more">+${items.length - PH_ROWS} more in the list</p>` : '');
+  }
+  function renderPhones(d, now, footHtml, footCls, staleMin) {
+    const bar = (t, u) => `<div class="ph-bar${staleMin ? ' stale' : ''}"><span class="t">${esc(t)}</span><span class="u">${esc(u)}</span></div>`;
+    const warn = staleMin ? `<div class="ph-warn">Data is ${staleMin} min old. Not getting new data.</div>` : '';
+    const foot = `<span class="ph-foot ${footCls}">${footHtml}</span>`;
+    const dots = i => `<div class="ph-dots">${[0, 1, 2].map(j => `<i${j === i ? ' class="on"' : ''}></i>`).join('')}</div>`;
+    const bar0 = `<div class="ph-status"><span class="ph-clock">${hhmm(simNow())}</span><span>5G</span></div>`;
+    const over4 = d.p1.filter(c => now - c.opened >= 240 * MIN).length;
+    const in30 = d.risk.filter(r => r.due - now <= 30 * MIN).length;
+    const asof = 'as of ' + hhmm(now, true) + ' UTC';
+    const tierLabel = V.tier === 'all' ? 'all tiers' : tierName(+V.tier);
+
+    const live = `${bar('Live', tierLabel + ' · ' + asof)}<div class="ph-body">${warn}
+      <div class="ph-tiles">
+        <div class="ph-tile"><span class="l">Open P1</span><span class="v">${d.p1.length}</span>${over4 ? `<span class="pill crit">${over4} over 4 h</span>` : '<span class="pill neutral">none over 4 h</span>'}</div>
+        <div class="ph-tile"><span class="l">SLA at risk</span><span class="v">${d.risk.length}</span>${in30 ? `<span class="pill warn">${in30} in 30 min</span>` : '<span class="pill neutral">none in 30 min</span>'}</div>
+      </div>
+      <div class="ph-tile"><span class="l">Requests waiting for pickup</span><span class="v">${d.pick.length}</span></div>
+      <div class="ph-card"><h3>Open P1 <small>tap to open in Salesforce</small></h3>${phRows(d.p1, c => `<div class="ph-row"><div class="m">${sfLink(c.id, 'case')}<span>${esc(tierName(c.tier))} · ${esc(c.product)} · ${esc(c.hospital)}</span></div><div class="r">${now - c.opened >= 240 * MIN ? `<span class="pill crit">${hm(now - c.opened)}</span>` : hm(now - c.opened)}</div></div>`)}</div>
+      ${foot}</div>${dots(0)}`;
+    const risk = `${bar('SLA at risk', 'least time left first · ' + asof)}<div class="ph-body">${warn}
+      <div class="ph-card"><h3>${d.risk.length} at risk <small>${esc(tierLabel)}</small></h3>${phRows(d.risk, r => { const m = Math.floor((r.due - now) / MIN); return `<div class="ph-row"><div class="m">${sfLink(r.c.id, 'case')}<span>${esc(r.c.prio)} · ${esc(tierName(r.c.tier))} · ${esc(r.milestone)}</span></div><div class="r"><span class="${leftClass(m)}">${hm(r.due - now)}</span></div></div>`; })}</div>
+      ${foot}</div>${dots(1)}`;
+    const pick = `${bar('Waiting for pickup', 'longest wait first · ' + asof)}<div class="ph-body">${warn}
+      <div class="ph-card"><h3>${d.pick.length} waiting <small>${esc(tierLabel)}</small></h3>${phRows(d.pick, r => `<div class="ph-row"><div class="m">${sfLink(r.id, 'request')}<span>to ${esc(tierName(r.tier))} · ${esc(r.prio)} · case ${esc(r.caseId)}</span></div><div class="r">${hm(now - r.opened)}</div></div>`)}</div>
+      ${foot}</div>${dots(2)}`;
+
+    $('phones').innerHTML = [
+      ['Live page', '1. Live', 'The three numbers that need action now, and the open P1 list', live],
+      ['SLA at risk page', '2. SLA at risk', 'Which case will breach first', risk],
+      ['Waiting for pickup page', '3. Waiting for pickup', 'Which escalation request is still sitting in a queue', pick],
+    ].map(([aria, t, cap, inner]) => `<figure><div class="phone" aria-label="${esc(aria)}">${bar0}${inner}</div><figcaption><b>${esc(t)}</b>${esc(cap)}</figcaption></figure>`).join('');
+  }
+
+  // status line only: runs every second without touching the lists, so focus and selection survive
+  function status() {
+    const ageMin = Math.floor((simNow() - S.dataTime) / MIN);
+    const staleMin = ageMin > STALE_MIN ? ageMin : 0;
+    const secs = Math.max(0, Math.ceil((V.nextAt - Date.now()) / 1000));
+    const foot = V.paused ? 'paused' : staleMin ? '● no new data' : '● live · next refresh in ' + secs + ' s';
+    const footCls = V.paused ? 'paused' : staleMin ? 'stale' : '';
+    $('asof').textContent = 'Data as of ' + hhmm(S.dataTime, true) + ' UTC';
+    $('live-state').textContent = V.paused ? 'Paused' : staleMin ? 'No new data' : 'Live';
+    $('next').textContent = V.paused ? 'auto refresh paused' : 'next refresh in ' + secs + ' s';
+    $('live').className = 'live' + (V.paused ? ' paused' : '') + (staleMin ? ' stale' : '');
+    $('stale').hidden = !staleMin;
+    $('stale-text').textContent = 'Data is ' + staleMin + ' min old.';
+    $('b-pause').textContent = V.paused ? 'Resume refresh' : 'Pause refresh';
+    $('b-stale').textContent = V.stalled ? 'Restore the feed' : 'Simulate a stalled feed';
+    document.querySelectorAll('.ph-foot').forEach(el => { el.textContent = foot; el.className = 'ph-foot ' + footCls; });
+    document.querySelectorAll('.ph-clock').forEach(el => { el.textContent = hhmm(simNow()); });
+    return { staleMin, foot, footCls };
+  }
+
+  function render() {
+    const st = status();
+    const d = views(S.dataTime);
+    const f = document.activeElement && document.activeElement.matches('a[data-sf]') ? document.activeElement.dataset.id : null;
+    if (V.view === 'desktop') renderDesktop(d, S.dataTime);
+    else renderPhones(d, S.dataTime, esc(st.foot), st.footCls, st.staleMin);
+    if (f) { const again = [...document.querySelectorAll('a[data-sf]')].find(a => a.dataset.id === f && a.offsetParent); if (again) again.focus({ preventScroll: true }); }
+  }
+
+  function refresh() {
+    V.nextAt = Date.now() + REFRESH_S * 1000;
+    if (V.stalled) { render(); return; }       // the DW stopped delivering: keep the old snapshot
+    const now = simNow();
+    evolve(now);
+    S.dataTime = now;
+    render();
+  }
+
+  // ---------- controls ----------
+  function setView(v) {
+    V.view = v === 'phone' ? 'phone' : 'desktop';
+    $('desktop').hidden = V.view !== 'desktop';
+    $('phone').hidden = V.view !== 'phone';
+    $('view-desktop').setAttribute('aria-pressed', String(V.view === 'desktop'));
+    $('view-phone').setAttribute('aria-pressed', String(V.view === 'phone'));
+    try { if (location.hash.slice(1) !== V.view) history.replaceState(null, '', '#' + V.view); } catch (e) { /* hash is optional */ }
+    render();
+  }
+  $('view-desktop').addEventListener('click', () => setView('desktop'));
+  $('view-phone').addEventListener('click', () => setView('phone'));
+  $('tier').addEventListener('change', e => { V.tier = e.target.value; V.prev = {}; render(); });
+  $('k-p1').addEventListener('click', () => { V.showP1 = !V.showP1; render(); });
+  $('b-pause').addEventListener('click', () => { V.paused = !V.paused; if (!V.paused) V.nextAt = Date.now() + REFRESH_S * 1000; render(); });
+  $('b-now').addEventListener('click', () => refresh());
+  $('b-stale').addEventListener('click', () => {
+    V.stalled = !V.stalled;
+    if (V.stalled) simOffset += (STALE_MIN + 1) * MIN;   // jump the clock: the last good data is now 6 minutes old
+    else refresh();
+    render();
+  });
+
+  let toastTimer;
+  document.addEventListener('click', e => {
+    const a = e.target.closest('a[data-sf]');
+    if (!a) return;
+    e.preventDefault();
+    const t = $('toast');
+    t.textContent = `In the real screen, this opens ${a.dataset.sf === 'request' ? 'request' : 'case'} ${a.dataset.id} in Salesforce.`;
+    t.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { t.hidden = true; }, 3200);
+  });
+
+  let lastStale = false;
+  setInterval(() => {
+    if (!V.paused && Date.now() >= V.nextAt) { refresh(); return; }
+    const st = status();
+    if (!!st.staleMin !== lastStale) render();          // the phone warning appears or clears
+    lastStale = !!st.staleMin;
+  }, 1000);
+
+  // hook for the automated tests in the repo; it only reads and sets this page's own synthetic data
+  window.__demo = { S, V, render, refresh, views: () => views(S.dataTime), setView };
+
+  seedData(BASE);
+  setView(location.hash.slice(1) === 'phone' ? 'phone' : 'desktop');
+})();
+</script>
