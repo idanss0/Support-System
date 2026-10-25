@@ -38,6 +38,7 @@ A documentation repo, not an application. It holds Hebrew MVP specs for a "Suppo
 - `docs/MVP-Mobile.md`: the mobile MVP.
 - Each `.md` has a committed `.docx` and `.pdf` twin with the same name. When a `.md` changes, its `.docx` (and the `.pdf`) must be rebuilt and committed with it.
 - `obsidian/*.md`: the hand-written Obsidian notes (hub and decisions). `tools/obsidian_sync.py` turns them and `docs/*.md` into the vault folder; `.claude/settings.local.json.example` runs it as a Stop hook.
+- `docs/dashboards/live.html`: the view-only demo of the MVP live screen (desktop and phone views, simulated 30-second refresh, no database), published at https://claude.ai/artifact/DKic16T79D1M1K6WJYbSmD. Republish it after changing it.
 - `docs/dashboards/index.html` and `mobile.html`: standalone mockups with synthetic data (inline CSS/JS, CSS-variable theme with dark mode). `docs/dashboards/img/*.png` are screenshots of them, embedded in the specs. Change a mockup, then retake the matching screenshot.
 
 ## Building the Word files
