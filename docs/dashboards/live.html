@@ -241,6 +241,7 @@ figcaption b { color: var(--ink); display: block; font-size: 13.5px; }
       <dt>Open P1</dt><dd>An open case whose current priority is P1.</dd>
       <dt>SLA at risk</dt><dd>An open milestone whose target time is within 60 minutes (P1/P2) or 4 hours (P3/P4). The SLA comes from Salesforce as is; the screen does not recalculate it.</dd>
       <dt>Waiting for pickup</dt><dd>An open escalation request whose owner is a queue, not a person. The wait counts from when the request was opened.</dd>
+      <dt>Owner</dt><dd>The person the case is assigned to in Salesforce, so the team lead knows who to talk to. It is not a measure of that person.</dd>
       <dt>Tier</dt><dd>The tier of the latest open request on the case, or Tier 1 when there is none. For a request, the tier it was sent to.</dd>
       <dt>Case and request links</dt><dd>In the real screen, each number opens the record in Salesforce. Here they only show a message.</dd>
     </dl>
@@ -267,6 +268,8 @@ figcaption b { color: var(--ink); display: block; font-size: 13.5px; }
   const nextCase = () => '0' + (caseNo += ri(3, 40));
   const nextReq = () => 'REQ-' + (reqNo += ri(1, 4));
   const hospital = () => 'Hospital ' + String(ri(1, 520)).padStart(3, '0');
+  const AGENTS = ['Dana L.', 'Omer K.', 'Noa S.', 'Tom R.', 'Maya G.', 'Eli B.', 'Sarah P.', 'James W.', 'Lior A.'];
+  const ownerOf = id => AGENTS[+id % AGENTS.length];  // fixed per case, and leaves the random sequence alone
   const tierOfCase = () => weighted([[1, 45], [2, 30], [3, 18], [4, 7]]);
 
   // simulated clock: the demo starts at 14:05 UTC on 2026-10-25 and runs in real time
@@ -278,7 +281,8 @@ figcaption b { color: var(--ink); display: block; font-size: 13.5px; }
   const S = { dataTime: BASE, p1: [], risk: [], pick: [], fresh: new Set() };
 
   function newCase(prio, tier) {
-    return { id: nextCase(), prio, tier: tier || tierOfCase(), product: pick(PRODUCTS), hospital: hospital() };
+    const id = nextCase();
+    return { id, prio, tier: tier || tierOfCase(), product: pick(PRODUCTS), hospital: hospital(), owner: ownerOf(id) };
   }
   function addRisk(now, c, dueInMin) {
     S.risk.push({ c, milestone: pick(MILESTONES), due: now + dueInMin * MIN });
@@ -356,14 +360,14 @@ figcaption b { color: var(--ink); display: block; font-size: 13.5px; }
 
     $('k-p1').setAttribute('aria-expanded', String(V.showP1));
     $('p1-panel').hidden = !V.showP1;
-    table($('p1-list'), ['Case', 'Tier', 'Product / version', 'Hospital', 'Open for'], d.p1.map(c => ({ isNew: S.fresh.has(c), cells: [
-      sfLink(c.id, 'case'), esc(tierName(c.tier)), esc(c.product), esc(c.hospital),
+    table($('p1-list'), ['Case', 'Tier', 'Product / version', 'Hospital', 'Owner', 'Open for'], d.p1.map(c => ({ isNew: S.fresh.has(c), cells: [
+      sfLink(c.id, 'case'), esc(tierName(c.tier)), esc(c.product), esc(c.hospital), esc(c.owner),
       now - c.opened >= 240 * MIN ? `<span class="pill crit">${hm(now - c.opened)}</span>` : hm(now - c.opened),
-    ] })), [4], 'No open P1 cases.');
-    table($('risk-list'), ['Case', 'Priority', 'Tier', 'Product / version', 'Hospital', 'Milestone', 'Time left'], d.risk.map(r => {
+    ] })), [5], 'No open P1 cases.');
+    table($('risk-list'), ['Case', 'Priority', 'Tier', 'Product / version', 'Hospital', 'Owner', 'Milestone', 'Time left'], d.risk.map(r => {
       const m = Math.floor((r.due - now) / MIN);
-      return { isNew: S.fresh.has(r), cells: [sfLink(r.c.id, 'case'), prioPill(r.c.prio), esc(tierName(r.c.tier)), esc(r.c.product), esc(r.c.hospital), esc(r.milestone), `<span class="${leftClass(m)}">${hm(r.due - now)}</span>`] };
-    }), [6], 'No milestone is due inside its window.');
+      return { isNew: S.fresh.has(r), cells: [sfLink(r.c.id, 'case'), prioPill(r.c.prio), esc(tierName(r.c.tier)), esc(r.c.product), esc(r.c.hospital), esc(r.c.owner), esc(r.milestone), `<span class="${leftClass(m)}">${hm(r.due - now)}</span>`] };
+    }), [7], 'No milestone is due inside its window.');
     table($('pick-list'), ['Request', 'Case', 'To tier', 'Priority', 'Waiting'], d.pick.map(r => {
       const m = Math.floor((now - r.opened) / MIN);
       return { isNew: S.fresh.has(r), cells: [sfLink(r.id, 'request'), sfLink(r.caseId, 'case'), esc(tierName(r.tier)), prioPill(r.prio), `<span class="${m >= 30 ? 't-warn' : ''}">${hm(now - r.opened)}</span>`] };
@@ -393,10 +397,10 @@ figcaption b { color: var(--ink); display: block; font-size: 13.5px; }
         <div class="ph-tile"><span class="l">SLA at risk</span><span class="v">${d.risk.length}</span>${in30 ? `<span class="pill warn">${in30} in 30 min</span>` : '<span class="pill neutral">none in 30 min</span>'}</div>
       </div>
       <div class="ph-tile"><span class="l">Requests waiting for pickup</span><span class="v">${d.pick.length}</span></div>
-      <div class="ph-card"><h3>Open P1 <small>tap to open in Salesforce</small></h3>${phRows(d.p1, c => `<div class="ph-row"><div class="m">${sfLink(c.id, 'case')}<span>${esc(tierName(c.tier))} · ${esc(c.product)} · ${esc(c.hospital)}</span></div><div class="r">${now - c.opened >= 240 * MIN ? `<span class="pill crit">${hm(now - c.opened)}</span>` : hm(now - c.opened)}</div></div>`)}</div>
+      <div class="ph-card"><h3>Open P1 <small>tap to open in Salesforce</small></h3>${phRows(d.p1, c => `<div class="ph-row"><div class="m">${sfLink(c.id, 'case')}<span>${esc(c.owner)} · ${esc(tierName(c.tier))} · ${esc(c.product)} · ${esc(c.hospital)}</span></div><div class="r">${now - c.opened >= 240 * MIN ? `<span class="pill crit">${hm(now - c.opened)}</span>` : hm(now - c.opened)}</div></div>`)}</div>
       ${foot}</div>${dots(0)}`;
     const risk = `${bar('SLA at risk', 'least time left first · ' + asof)}<div class="ph-body">${warn}
-      <div class="ph-card"><h3>${d.risk.length} at risk <small>${esc(tierLabel)}</small></h3>${phRows(d.risk, r => { const m = Math.floor((r.due - now) / MIN); return `<div class="ph-row"><div class="m">${sfLink(r.c.id, 'case')}<span>${esc(r.c.prio)} · ${esc(tierName(r.c.tier))} · ${esc(r.milestone)}</span></div><div class="r"><span class="${leftClass(m)}">${hm(r.due - now)}</span></div></div>`; })}</div>
+      <div class="ph-card"><h3>${d.risk.length} at risk <small>${esc(tierLabel)}</small></h3>${phRows(d.risk, r => { const m = Math.floor((r.due - now) / MIN); return `<div class="ph-row"><div class="m">${sfLink(r.c.id, 'case')}<span>${esc(r.c.owner)} · ${esc(r.c.prio)} · ${esc(tierName(r.c.tier))} · ${esc(r.milestone)}</span></div><div class="r"><span class="${leftClass(m)}">${hm(r.due - now)}</span></div></div>`; })}</div>
       ${foot}</div>${dots(1)}`;
     const pick = `${bar('Waiting for pickup', 'longest wait first · ' + asof)}<div class="ph-body">${warn}
       <div class="ph-card"><h3>${d.pick.length} waiting <small>${esc(tierLabel)}</small></h3>${phRows(d.pick, r => `<div class="ph-row"><div class="m">${sfLink(r.id, 'request')}<span>to ${esc(tierName(r.tier))} · ${esc(r.prio)} · case ${esc(r.caseId)}</span></div><div class="r">${hm(now - r.opened)}</div></div>`)}</div>
